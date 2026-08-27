@@ -1,0 +1,49 @@
+{
+  "name": "asad",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node scripts/migrer.mjs && next start",
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:deploy": "node scripts/migrer.mjs",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:exporter": "node scripts/base.mjs exporter",
+    "db:importer": "node scripts/base.mjs importer",
+    "auth:secret": "node scripts/auth.mjs secret",
+    "auth:utilisateur": "node scripts/auth.mjs utilisateur",
+    "auth:lister": "node scripts/auth.mjs lister",
+    "auth:demarrage": "node scripts/auth.mjs demarrage",
+    "marque": "node scripts/marque.mjs"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.10",
+    "lucide-react": "^1.34.0",
+    "next": "16.3.3",
+    "postgres": "^3.4.9",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.3",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.12",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

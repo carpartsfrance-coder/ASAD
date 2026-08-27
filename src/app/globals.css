@@ -1,0 +1,227 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Jetons de design ASAD — palette « Noir, blanc, rouge »
+   Trois couleurs, pas une de plus. Les gris sont du noir transparent,
+   les roses très clairs sont du rouge transparent : aucune autre teinte
+   n'entre dans la palette.
+   ------------------------------------------------------------------ */
+@theme {
+  /* Couleurs */
+  /* Noir franc : barre d'aide, bandeaux sombres, pied de page, barre admin. */
+  --color-pri: #000000;
+  /* Survol d'un bouton noir — on ne peut pas assombrir le noir, on l'éclaircit. */
+  --color-pri-dark: #262626;
+
+  /* Rouge vif — dons, badges, liens, entrée active du back-office. */
+  --color-acc: #e80020;
+  --color-acc-dark: #be001a;
+  /* Rouge clair, lisible sur fond noir. */
+  --color-acc-light: #ff6b6b;
+  /* Rouge très dilué, pour les fonds de survol. */
+  --color-acc-soft: #ffebee;
+
+  /* Fond de page : blanc franc. */
+  --color-canvas: #ffffff;
+  /* Surfaces secondaires — survols, encadrés internes, fond du back-office. */
+  --color-subtil: #f5f5f5;
+  /* Cercles d'icônes, pistes de barres, fond de repli des images. */
+  --color-soft: #ffebee;
+  /* Panneaux de mise en avant. */
+  --color-warm: #f7f7f7;
+
+  --color-ink: #000000;
+  --color-mut: #616161;
+  --color-line: #e5e5e5;
+  --color-citation: #333333;
+  --color-navlink: #4d4d4d;
+  --color-field: #1a1a1a;
+  /* Badge « Adopté », campagne terminée. */
+  --color-track: #4d4d4d;
+
+  /* Statuts du back-office — quatre pastilles distinctes, sans sortir
+     du noir, du blanc et du rouge. */
+  --color-succes: #000000;
+  --color-succes-ink: #ffffff;
+  --color-attente: #ffebee;
+  --color-attente-ink: #be001a;
+  --color-alerte: #e80020;
+  --color-alerte-ink: #ffffff;
+  --color-neutre: #f0f0f0;
+  --color-neutre-ink: #616161;
+
+  /* Erreurs de saisie. */
+  --color-erreur: #be001a;
+  --color-erreur-fond: #fff5f6;
+  --color-erreur-bandeau: #fff0f1;
+
+  /* Typographie */
+  --font-sans: var(--font-figtree), "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --text-micro: 11.5px;
+  --text-tiny: 12.5px;
+  --text-mini: 13px;
+  --text-meta: 13.5px;
+  --text-body: 14.5px;
+  --text-nav: 15px;
+  --text-lead: 15.5px;
+  --text-quote: 16px;
+  --text-card: 17.5px;
+  --text-stat: 21px;
+  --text-title: 24px;
+  --text-section: 35px;
+  --text-num: 36px;
+  --text-hero: 54px;
+
+  /* Rayons */
+  --radius-btn: 9px;
+  --radius-cta: 10px;
+  --radius-media: 12px;
+  --radius-urgent: 13px;
+  --radius-card: 14px;
+  --radius-panel: 16px;
+  --radius-tag: 7px;
+
+  /* Ombres */
+  --shadow-stat: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.09);
+  --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.08);
+  --shadow-fav: 0 3px 10px rgba(0, 0, 0, 0.2);
+  --shadow-float: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+blockquote,
+li {
+  text-wrap: pretty;
+}
+
+/* Anneau de focus visible sur tous les éléments interactifs (a11y). */
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-acc);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Trace de pattes du titre d'accueil                                  */
+/* ------------------------------------------------------------------ */
+
+@keyframes trace-pattes-pas {
+  from {
+    opacity: 0;
+    transform: translate(-0.55em, 0.4em) rotate(var(--pivot)) scale(0.6);
+  }
+  55% {
+    opacity: var(--teinte);
+    transform: translate(0.02em, -0.07em) rotate(var(--pivot)) scale(1.07);
+  }
+  to {
+    opacity: var(--teinte);
+    transform: translate(0, 0) rotate(var(--pivot)) scale(1);
+  }
+}
+
+.trace-pattes > * {
+  opacity: var(--teinte);
+  transform: rotate(var(--pivot));
+  animation: trace-pattes-pas 640ms cubic-bezier(0.22, 0.9, 0.3, 1.25) both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Empreintes de pattes derrière la souris                             */
+/* ------------------------------------------------------------------ */
+
+.piste-pattes {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  /* Décor pur : ne doit jamais intercepter un clic. */
+  pointer-events: none;
+}
+
+@keyframes patte-qui-sefface {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--cap)) scale(0.55);
+  }
+  16% {
+    opacity: 0.46;
+    transform: translate(-50%, -50%) rotate(var(--cap)) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--cap)) scale(0.94);
+  }
+}
+
+.patte-posee {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  color: var(--color-acc);
+  pointer-events: none;
+  animation: patte-qui-sefface 1150ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Utilitaires spécifiques au design
+   ------------------------------------------------------------------ */
+
+/* Arche du héro — adoucie sur mobile, valeur exacte de la maquette en ≥1024px. */
+.arch {
+  border-radius: 74px 20px 20px 20px / 100px 20px 20px 20px;
+}
+
+@media (min-width: 768px) {
+  .arch {
+    border-radius: 120px 24px 24px 24px / 165px 24px 24px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .arch {
+    border-radius: 170px 26px 26px 26px / 235px 26px 26px 26px;
+  }
+}
+
+/* Lien souligné « accent » récurrent dans la maquette. */
+.link-underline {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}

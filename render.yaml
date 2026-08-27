@@ -1,0 +1,56 @@
+# ------------------------------------------------------------------
+# Déploiement du site ASAD sur Render.
+#
+# Sur Render : New → Blueprint → choisir ce dépôt.
+# Render lit ce fichier et crée les deux éléments ci-dessous.
+#
+# ⚠️ Les plans indiqués sont PAYANTS (Render affiche le prix avant de valider).
+#    Le plan « free » existe pour les deux, mais :
+#      • la base de données gratuite est SUPPRIMÉE 30 jours après sa création ;
+#      • le site gratuit s'éteint après 15 min sans visite et met ~1 min à
+#        redémarrer à la visite suivante.
+#    Pour un site d'association qui reste en ligne, garder ces plans-ci.
+# ------------------------------------------------------------------
+
+databases:
+  - name: asad-base
+    databaseName: asad
+    user: asad
+    plan: basic-256mb
+    region: frankfurt
+
+services:
+  - type: web
+    name: asad
+    runtime: node
+    plan: starter
+    region: frankfurt
+    branch: main
+
+    # --include=dev : TypeScript et Tailwind sont nécessaires à la compilation.
+    buildCommand: npm ci --include=dev && npm run build
+    # `npm start` applique les migrations avant de démarrer le serveur.
+    startCommand: npm start
+
+    healthCheckPath: /
+
+    envVars:
+      # Fourni automatiquement par la base créée ci-dessus.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: asad-base
+          property: connectionString
+
+      # Clé de signature des sessions du back-office : générée par Render,
+      # jamais visible dans le dépôt.
+      - key: ASAD_AUTH_SECRET
+        generateValue: true
+
+      - key: NODE_VERSION
+        value: "22"
+
+      # À renseigner dans Render après le premier déploiement, avec l'adresse
+      # réelle du site (https://asad.onrender.com, puis le vrai domaine).
+      # Sert aux liens du plan de site et aux aperçus de partage.
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
