@@ -107,65 +107,53 @@ function Case({
 /* ------------------------------------------------------------------ */
 
 /**
- * Les sept étapes du parcours.
+ * Les étapes du complément — tout ce qui n'est pas nécessaire pour publier.
  *
- * `label` sert au repère du haut, `titre` et `phrase` expliquent l'étape en
- * cours : sans eux, une rangée d'onglets ne se lit pas comme un chemin à
- * suivre, et on ne devine pas qu'il faut cliquer.
+ * L'écran d'entrée, lui, n'est pas dans cette liste : c'est « l'essentiel »,
+ * les sept champs qui suffisent à mettre un animal en ligne.
  */
 const ONGLETS = [
   {
     cle: "identite",
-    label: "Identité",
-    titre: "Qui est-il ?",
-    phrase:
-      "Son nom, son espèce, son âge et son numéro d’identification.",
+    label: "Détails",
+    titre: "Quelques précisions",
+    phrase: "Sa race, sa taille, son poids, où il est hébergé.",
   },
   {
     cle: "presentation",
-    label: "Présentation",
-    titre: "Comment le présenter ?",
-    phrase:
-      "Le texte qui s’affiche en haut de sa fiche, son histoire et son caractère.",
+    label: "Caractère",
+    titre: "Comment est-il ?",
+    phrase: "Quelques mots qui le décrivent, affichés en pastilles sur sa fiche.",
   },
   {
     cle: "compatibilites",
     label: "Compatibilités",
     titre: "Avec qui peut-il vivre ?",
-    phrase:
-      "Ce qu’il supporte : les autres chiens, les chats, les enfants.",
+    phrase: "Ce qu'il supporte : les autres chiens, les chats, les enfants.",
   },
   {
     cle: "sante",
     label: "Santé",
     titre: "Où en est sa santé ?",
-    phrase:
-      "Vacciné, identifié, stérilisé, et les soins en cours s’il y en a.",
+    phrase: "Vacciné, identifié, stérilisé, et les soins en cours s'il y en a.",
   },
   {
     cle: "adoption",
     label: "Adoption",
     titre: "À quelles conditions ?",
-    phrase:
-      "Les frais demandés et ce que vous attendez de la future famille.",
-  },
-  {
-    cle: "photos",
-    label: "Photos",
-    titre: "Ses photos",
-    phrase:
-      "Au moins une photo est nécessaire pour publier la fiche.",
+    phrase: "Les frais demandés et ce que vous attendez de la future famille.",
   },
   {
     cle: "publication",
-    label: "Publication",
-    titre: "Prête à partir ?",
-    phrase:
-      "Vérifiez ce qui manque, puis choisissez si la fiche reste en brouillon ou part en ligne.",
+    label: "Réglages",
+    titre: "Réglages de la fiche",
+    phrase: "Urgence, réservation, adresse de la page — à ne toucher qu'au besoin.",
   },
 ] as const;
 
 type CleOnglet = (typeof ONGLETS)[number]["cle"];
+/** « essentiel » est l'écran d'entrée, pas une étape du complément. */
+type Vue = CleOnglet | "essentiel";
 
 const OPTIONS_COMPAT = [
   { valeur: "oui", label: "Oui" },
@@ -194,7 +182,7 @@ export function EditeurAnimal({
   /** L'assistant de rédaction n'apparaît que si une clé OpenAI est configurée. */
   assistantDisponible?: boolean;
 }) {
-  const [onglet, setOnglet] = useState<CleOnglet>("identite");
+  const [onglet, setOnglet] = useState<Vue>("essentiel");
   const [statut, setStatut] = useState(fiche?.statut ?? "brouillon");
   const [etat, action, enCours] = useActionState(enregistrerFiche, etatInitial);
 
@@ -202,16 +190,17 @@ export function EditeurAnimal({
   const nouvelle = !fiche;
 
   /** Une étape reste montée mais masquée : la saisie n'est jamais perdue. */
-  const panneau = (cle: CleOnglet) =>
+  const panneau = (cle: Vue) =>
     cn("space-y-5", onglet === cle ? "block" : "hidden");
 
+  const surEssentiel = onglet === "essentiel";
   const indexEtape = ONGLETS.findIndex((o) => o.cle === onglet);
   const etape = ONGLETS[indexEtape];
   const premiere = indexEtape === 0;
   const derniere = indexEtape === ONGLETS.length - 1;
 
   /** Change d'étape et remonte : sinon on reste au milieu du formulaire. */
-  const allerA = (cle: CleOnglet) => {
+  const allerA = (cle: Vue) => {
     setOnglet(cle);
     document
       .getElementById("parcours-fiche")
@@ -222,67 +211,86 @@ export function EditeurAnimal({
     <form action={action}>
       {fiche && <input type="hidden" name="id" value={fiche.id} />}
 
-      {/* Parcours : où on en est, et ce qu'on fait à cette étape */}
+      {/* En-tête : titre simple sur l'essentiel, parcours sur le complément */}
       <div
         id="parcours-fiche"
         className="scroll-mt-4 rounded-media border-[1.4px] border-line bg-white p-4 sm:p-5"
       >
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-tiny font-bold tracking-[0.08em] uppercase text-acc">
-            Étape {indexEtape + 1} sur {ONGLETS.length}
-          </p>
-          <p className="text-tiny text-mut">
-            Vous pouvez revenir en arrière à tout moment.
-          </p>
-        </div>
-
-        {/* Barre d'avancement */}
-        <div
-          className="mt-2.5 flex gap-1"
-          role="progressbar"
-          aria-valuenow={indexEtape + 1}
-          aria-valuemin={1}
-          aria-valuemax={ONGLETS.length}
-          aria-label={`Étape ${indexEtape + 1} sur ${ONGLETS.length} : ${etape.titre}`}
-        >
-          {ONGLETS.map((o, i) => (
-            <span
-              key={o.cle}
-              className={cn(
-                "h-1.5 flex-1 rounded-full transition-colors duration-200",
-                i <= indexEtape ? "bg-acc" : "bg-line",
-              )}
-            />
-          ))}
-        </div>
-
-        <h2 className="mt-4 text-card font-extrabold text-ink">{etape.titre}</h2>
-        <p className="mt-1 text-meta leading-[1.6] text-mut">{etape.phrase}</p>
-
-        {/* Accès direct, pour qui préfère naviguer librement */}
-        <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-3">
-          {ONGLETS.map((o, i) => {
-            const actif = onglet === o.cle;
-            return (
+        {surEssentiel ? (
+          <>
+            <p className="text-tiny font-bold tracking-[0.08em] uppercase text-acc">
+              L’essentiel
+            </p>
+            <h2 className="mt-2 text-card font-extrabold text-ink">
+              De quoi mettre l’animal en ligne
+            </h2>
+            <p className="mt-1 text-meta leading-[1.6] text-mut">
+              Sept champs suffisent. Tout le reste est facultatif et peut
+              attendre.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-tiny font-bold tracking-[0.08em] uppercase text-acc">
+                Compléter — étape {indexEtape + 1} sur {ONGLETS.length}
+              </p>
               <button
-                key={o.cle}
                 type="button"
-                aria-current={actif ? "step" : undefined}
-                onClick={() => allerA(o.cle)}
-                className={cn(
-                  "h-7 rounded-full px-2.5 text-tiny transition-colors duration-150",
-                  actif
-                    ? "bg-pri font-semibold text-white"
-                    : i < indexEtape
-                      ? "text-acc hover:bg-acc-soft"
-                      : "text-mut hover:bg-acc-soft hover:text-pri",
-                )}
+                onClick={() => allerA("essentiel")}
+                className="text-tiny font-semibold text-mut underline underline-offset-2 transition-colors duration-150 hover:text-pri"
               >
-                {i + 1}. {o.label}
+                Revenir à l’essentiel
               </button>
-            );
-          })}
-        </div>
+            </div>
+
+            <div
+              className="mt-2.5 flex gap-1"
+              role="progressbar"
+              aria-valuenow={indexEtape + 1}
+              aria-valuemin={1}
+              aria-valuemax={ONGLETS.length}
+              aria-label={`Étape ${indexEtape + 1} sur ${ONGLETS.length} : ${etape.titre}`}
+            >
+              {ONGLETS.map((o, i) => (
+                <span
+                  key={o.cle}
+                  className={cn(
+                    "h-1.5 flex-1 rounded-full transition-colors duration-200",
+                    i <= indexEtape ? "bg-acc" : "bg-line",
+                  )}
+                />
+              ))}
+            </div>
+
+            <h2 className="mt-4 text-card font-extrabold text-ink">{etape.titre}</h2>
+            <p className="mt-1 text-meta leading-[1.6] text-mut">{etape.phrase}</p>
+
+            <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-3">
+              {ONGLETS.map((o, i) => {
+                const actif = onglet === o.cle;
+                return (
+                  <button
+                    key={o.cle}
+                    type="button"
+                    aria-current={actif ? "step" : undefined}
+                    onClick={() => allerA(o.cle)}
+                    className={cn(
+                      "h-7 rounded-full px-2.5 text-tiny transition-colors duration-150",
+                      actif
+                        ? "bg-pri font-semibold text-white"
+                        : i < indexEtape
+                          ? "text-acc hover:bg-acc-soft"
+                          : "text-mut hover:bg-acc-soft hover:text-pri",
+                    )}
+                  >
+                    {i + 1}. {o.label}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {etat.statut === "erreur" && (
@@ -296,8 +304,13 @@ export function EditeurAnimal({
       )}
 
       <CarteAdmin className="mt-4 p-5 sm:p-6">
-        {/* ---------------- Identité ---------------- */}
-        <div className={panneau("identite")}>
+        {/* ---------------- L'essentiel ---------------- */}
+        <div className={panneau("essentiel")}>
+          <p className="text-meta leading-[1.6] text-mut">
+            De quoi mettre l’animal en ligne. Le reste est facultatif et peut
+            attendre : vous pourrez y revenir quand vous aurez le temps.
+          </p>
+
           <div className="grid gap-5 sm:grid-cols-2">
             <Champ id="nom" label="Nom de l’animal" erreur={erreurs.nom}>
               <Texte id="nom" name="nom" defaultValue={fiche?.nom} required />
@@ -331,6 +344,45 @@ export function EditeurAnimal({
             <Champ id="age" label="Âge affiché" aide="Tel qu’il apparaîtra sur le site : « 3 ans », « 6 mois »." erreur={erreurs.age}>
               <Texte id="age" name="age" defaultValue={fiche?.age} required />
             </Champ>
+            <Champ id="commune" label="Où se trouve l’animal" aide="Commune et département : « Lunel (34) »." erreur={erreurs.commune}>
+              <Texte id="commune" name="commune" defaultValue={fiche?.commune} required />
+            </Champ>
+          </div>
+
+          <Champ
+            id="descriptionCourte"
+            label="Description"
+            aide="Qui il est, d’où il vient, son caractère. Quelques phrases suffisent — écrivez comme vous parlez, l’assistant met au propre."
+            erreur={erreurs.descriptionCourte}
+          >
+            <Zone id="descriptionCourte" name="descriptionCourte" rows={8} defaultValue={fiche?.descriptionCourte} />
+            {assistantDisponible && <BoutonReformuler champ="descriptionCourte" />}
+          </Champ>
+
+          <TeleverseurPhotos
+            photosInitiales={fiche?.galerie}
+            legende="Glissez les photos de l’animal ici"
+            erreur={erreurs.galerie}
+          />
+
+          <Champ
+            id="statut"
+            label="État de la fiche"
+            aide="C’est ce qui décide si la fiche est visible sur le site, et comment."
+          >
+            <Liste
+              id="statut"
+              name="statut"
+              defaultValue={fiche?.statut ?? "brouillon"}
+              onChange={(e) => setStatut(e.target.value as Animal["statut"])}
+              options={OPTIONS_STATUT}
+            />
+          </Champ>
+        </div>
+
+        {/* ---------------- Identité ---------------- */}
+        <div className={panneau("identite")}>
+          <div className="grid gap-5 sm:grid-cols-2">
             <Champ id="race" label="Race" aide="Laissez vide si vous ne la connaissez pas.">
               <Texte id="race" name="race" defaultValue={fiche?.race ?? ""} placeholder="Labrador croisé" />
             </Champ>
@@ -352,9 +404,6 @@ export function EditeurAnimal({
             <Champ id="poidsKg" label="Poids en kilos">
               <Texte id="poidsKg" name="poidsKg" type="number" step="0.1" min={0} defaultValue={fiche?.poidsKg} />
             </Champ>
-            <Champ id="commune" label="Où se trouve l’animal" aide="Commune et département : « Lunel (34) »." erreur={erreurs.commune}>
-              <Texte id="commune" name="commune" defaultValue={fiche?.commune} required />
-            </Champ>
             <Champ id="familleAccueil" label="Famille d’accueil" aide="Facultatif — affiché sur la fiche.">
               <Texte id="familleAccueil" name="familleAccueil" defaultValue={fiche?.familleAccueil} />
             </Champ>
@@ -366,15 +415,6 @@ export function EditeurAnimal({
 
         {/* ---------------- Présentation ---------------- */}
         <div className={panneau("presentation")}>
-          <Champ
-            id="descriptionCourte"
-            label="Description"
-            aide="Qui il est, d’où il vient, son caractère. Quelques phrases suffisent — écrivez comme vous parlez, l’assistant met au propre."
-            erreur={erreurs.descriptionCourte}
-          >
-            <Zone id="descriptionCourte" name="descriptionCourte" rows={8} defaultValue={fiche?.descriptionCourte} />
-            {assistantDisponible && <BoutonReformuler champ="descriptionCourte" />}
-          </Champ>
           {/* L'histoire n'est plus saisie séparément : une seule description.
               La valeur existante est conservée telle quelle. */}
           <input type="hidden" name="histoire" defaultValue={fiche?.histoire.join("\n") ?? ""} />
@@ -456,30 +496,8 @@ export function EditeurAnimal({
           </Champ>
         </div>
 
-        {/* ---------------- Photos ---------------- */}
-        <div className={panneau("photos")}>
-          <TeleverseurPhotos
-            photosInitiales={fiche?.galerie}
-            legende="Glissez les photos de l’animal ici"
-            erreur={erreurs.galerie}
-          />
-        </div>
-
         {/* ---------------- Publication ---------------- */}
         <div className={panneau("publication")}>
-          <Champ
-            id="statut"
-            label="État de la fiche"
-            aide="C’est ce qui décide si la fiche est visible sur le site, et comment."
-          >
-            <Liste
-              id="statut"
-              name="statut"
-              defaultValue={fiche?.statut ?? "brouillon"}
-              onChange={(e) => setStatut(e.target.value as Animal["statut"])}
-              options={OPTIONS_STATUT}
-            />
-          </Champ>
 
           {statut === "urgent" && (
             <div className="space-y-5 rounded-media border border-line bg-subtil p-4">
@@ -565,34 +583,54 @@ export function EditeurAnimal({
             <Texte id="slug" name="slug" defaultValue={fiche?.slug} placeholder="oslo" />
           </Champ>
         </div>
-        {onglet === "publication" && <ControlePublication statut={statut} />}
+        {(surEssentiel || onglet === "publication") && (
+          <ControlePublication statut={statut} />
+        )}
 
-        {/* Le chemin à suivre : c'est ce bouton qui fait avancer, pas les onglets. */}
         <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-5">
-          {!premiere && (
-            <button
-              type="button"
-              onClick={() => allerA(ONGLETS[indexEtape - 1].cle)}
-              className="inline-flex h-11 items-center gap-2 rounded-btn border-[1.4px] border-line bg-white px-4 text-meta font-semibold text-pri transition-colors duration-150 hover:border-pri"
-            >
-              <ChevronLeft size={17} strokeWidth={2} aria-hidden="true" />
-              {ONGLETS[indexEtape - 1].label}
-            </button>
-          )}
-
-          {!derniere ? (
-            <button
-              type="button"
-              onClick={() => allerA(ONGLETS[indexEtape + 1].cle)}
-              className="ml-auto inline-flex h-11 items-center gap-2.5 rounded-btn bg-pri px-5 text-meta font-bold text-white transition-colors duration-150 hover:bg-pri-dark"
-            >
-              Continuer — {ONGLETS[indexEtape + 1].label}
-              <ChevronRight size={17} strokeWidth={2} aria-hidden="true" />
-            </button>
+          {surEssentiel ? (
+            <>
+              <p className="text-tiny leading-[1.6] text-mut">
+                Vous pouvez enregistrer maintenant et compléter plus tard.
+              </p>
+              <button
+                type="button"
+                onClick={() => allerA(ONGLETS[0].cle)}
+                className="ml-auto inline-flex h-11 items-center gap-2.5 rounded-btn border-[1.4px] border-line bg-white px-4 text-meta font-semibold text-pri transition-colors duration-150 hover:border-pri"
+              >
+                Compléter la fiche
+                <span className="text-tiny font-normal text-mut">(facultatif)</span>
+                <ChevronRight size={17} strokeWidth={2} aria-hidden="true" />
+              </button>
+            </>
           ) : (
-            <p className="ml-auto text-tiny text-mut">
-              Dernière étape — enregistrez ci-dessous.
-            </p>
+            <>
+              <button
+                type="button"
+                onClick={() =>
+                  allerA(premiere ? "essentiel" : ONGLETS[indexEtape - 1].cle)
+                }
+                className="inline-flex h-11 items-center gap-2 rounded-btn border-[1.4px] border-line bg-white px-4 text-meta font-semibold text-pri transition-colors duration-150 hover:border-pri"
+              >
+                <ChevronLeft size={17} strokeWidth={2} aria-hidden="true" />
+                {premiere ? "L’essentiel" : ONGLETS[indexEtape - 1].label}
+              </button>
+
+              {!derniere ? (
+                <button
+                  type="button"
+                  onClick={() => allerA(ONGLETS[indexEtape + 1].cle)}
+                  className="ml-auto inline-flex h-11 items-center gap-2.5 rounded-btn bg-pri px-5 text-meta font-bold text-white transition-colors duration-150 hover:bg-pri-dark"
+                >
+                  Continuer — {ONGLETS[indexEtape + 1].label}
+                  <ChevronRight size={17} strokeWidth={2} aria-hidden="true" />
+                </button>
+              ) : (
+                <p className="ml-auto text-tiny text-mut">
+                  Dernière étape — enregistrez ci-dessous.
+                </p>
+              )}
+            </>
           )}
         </div>
       </CarteAdmin>
@@ -609,7 +647,7 @@ export function EditeurAnimal({
           disabled={enCours}
           className={cn(
             "inline-flex h-10 items-center gap-2 rounded-btn px-4 text-meta transition-colors duration-150 disabled:opacity-60",
-            derniere
+            surEssentiel || derniere
               ? "bg-acc font-bold text-white hover:bg-acc-dark"
               : "border-[1.4px] border-line bg-white font-semibold text-pri hover:border-pri",
           )}
@@ -617,7 +655,7 @@ export function EditeurAnimal({
           <Save size={17} strokeWidth={2} aria-hidden="true" />
           {enCours
             ? "Enregistrement…"
-            : derniere
+            : surEssentiel || derniere
               ? nouvelle
                 ? "Créer la fiche"
                 : "Enregistrer"

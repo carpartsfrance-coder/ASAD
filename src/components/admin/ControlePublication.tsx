@@ -44,14 +44,14 @@ function releve(form: HTMLFormElement): Point[] {
     {
       cle: "descriptionCourte",
       libelle: "La description",
-      onglet: "Présentation",
+      onglet: "L’essentiel",
       bloquant: true,
       rempli: valeur(form, "descriptionCourte") !== "",
     },
     {
       cle: "galerie",
       libelle: "Au moins une photo",
-      onglet: "Photos",
+      onglet: "L’essentiel",
       bloquant: true,
       rempli: photos > 0,
     },
@@ -131,7 +131,7 @@ export function ControlePublication({ statut }: { statut: string }) {
               <ul className="mt-1.5 ml-6 list-disc space-y-1 text-tiny leading-[1.6] text-mut marker:text-erreur">
                 {bloquants.map((p) => (
                   <li key={p.cle}>
-                    {p.libelle} <span className="text-mut/70">— onglet {p.onglet}</span>
+                    {p.libelle} <span className="text-mut/70">— {p.onglet}</span>
                   </li>
                 ))}
               </ul>
@@ -146,7 +146,7 @@ export function ControlePublication({ statut }: { statut: string }) {
               <ul className="mt-1.5 ml-6 list-disc space-y-1 text-tiny leading-[1.6] text-mut">
                 {remarques.map((p) => (
                   <li key={p.cle}>
-                    {p.libelle} <span className="text-mut/70">— onglet {p.onglet}</span>
+                    {p.libelle} <span className="text-mut/70">— {p.onglet}</span>
                   </li>
                 ))}
               </ul>
