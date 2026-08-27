@@ -34,6 +34,9 @@ import { libelleStatut, sousTitreAnimal } from "@/lib/animaux";
 import { compterParStatut, toutesLesFiches } from "@/lib/donnees/animaux";
 import type { StatutAnimal, StatutDemande } from "@/types";
 
+/** Compteurs en direct : jamais figés à la compilation. */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Tableau de bord" };
 
 /* Correspondance statut → couleur fonctionnelle. */

@@ -2,6 +2,15 @@ import type { MetadataRoute } from "next";
 import { routes, siteUrl } from "@/content/site";
 import { animauxPublies } from "@/lib/donnees/animaux";
 
+/**
+ * Généré à chaque requête, jamais à la compilation.
+ *
+ * Deux raisons : le plan du site doit refléter les animaux publiés à l'instant
+ * T, et surtout la compilation ne doit jamais dépendre de la base — au premier
+ * déploiement, les tables n'existent pas encore quand le build tourne.
+ */
+export const dynamic = "force-dynamic";
+
 /** Plan du site : pages fixes + fiches animaux et actualités. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const maintenant = new Date();
@@ -28,13 +37,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: maintenant,
   }));
 
-  const fichesAnimaux: MetadataRoute.Sitemap = (await animauxPublies()).map((animal) => ({
-    url: `${siteUrl}${routes.animal(animal.slug)}`,
-    lastModified: new Date(animal.datePublication),
-    changeFrequency: "weekly",
-    priority: animal.statut === "adopte" ? 0.4 : 0.8,
-  }));
-
+  /**
+   * Si la base est indisponible, on sert quand même le plan des pages fixes
+   * plutôt que de renvoyer une erreur aux moteurs de recherche.
+   */
+  let fichesAnimaux: MetadataRoute.Sitemap = [];
+  try {
+    fichesAnimaux = (await animauxPublies()).map((animal) => ({
+      url: `${siteUrl}${routes.animal(animal.slug)}`,
+      lastModified: new Date(animal.datePublication),
+      changeFrequency: "weekly",
+      priority: animal.statut === "adopte" ? 0.4 : 0.8,
+    }));
+  } catch (erreur) {
+    console.error(
+      "[ASAD] Plan du site : les fiches animaux n'ont pas pu être lues.",
+      erreur,
+    );
+  }
 
   return [...pagesFixes, ...fichesAnimaux];
 }
