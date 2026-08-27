@@ -141,3 +141,74 @@ export const pageSignaler = {
   urgenceVitale:
     "En cas d’urgence vitale (animal gravement blessé, accident de la route), contactez directement un vétérinaire ou les services de secours avant de remplir ce formulaire.",
 } as const;
+
+/** Page « Adoptés » — d'après le handoff design_handoff_page_adoptes. */
+export const pageAdoptes = {
+  surtitre: "Histoires de sauvetage",
+  /** Le retour à la ligne est voulu par la maquette. */
+  titreLigne1: "Ils ont trouvé",
+  titreLigne2: "leur famille",
+  chapo:
+    "Recueillis, soignés et accompagnés par l’ASAD, ils vivent aujourd’hui une nouvelle histoire.",
+
+  parcours: {
+    libelle: "Leur parcours",
+    etapes: [
+      {
+        titre: "Recueillis",
+        texte: "Des animaux en détresse sont secourus et mis en sécurité.",
+        icone: "cible",
+      },
+      {
+        titre: "Soignés",
+        texte: "Ils sont examinés, soignés et remis sur pattes avec douceur et patience.",
+        icone: "soin",
+      },
+      {
+        titre: "Accueillis",
+        texte: "En famille d’accueil, ils retrouvent confiance et apprennent la vie de foyer.",
+        icone: "maison",
+      },
+      {
+        titre: "Adoptés",
+        texte: "Ils trouvent enfin leur famille pour la vie et une nouvelle histoire commence.",
+        icone: "coeur",
+      },
+    ],
+  },
+
+  histoires: { titre: "Leur nouvelle vie" },
+
+  bandeau: {
+    titre: "Chaque adoption est une victoire",
+    texte: "Découvrez les parcours racontés par l’équipe de l’ASAD.",
+    lienLabel: "Voir toutes les histoires",
+  },
+
+  disponibles: {
+    titre: "Une nouvelle histoire peut commencer avec vous",
+    sousTitre: "Ils attendent encore la famille qui changera leur vie.",
+    ctaLabel: "Découvrir tous les animaux",
+  },
+
+  actions: [
+    {
+      titre: "Adopter",
+      texte: "Offrez-leur un foyer pour la vie.",
+      ctaLabel: "Voir les animaux à adopter",
+      icone: "maison",
+    },
+    {
+      titre: "Devenir famille d’accueil",
+      texte: "Accueillez temporairement et changez leur quotidien.",
+      ctaLabel: "En savoir plus",
+      icone: "accueil",
+    },
+    {
+      titre: "Faire un don",
+      texte: "Votre soutien nous permet de continuer à les sauver.",
+      ctaLabel: "Faire un don",
+      icone: "coeur",
+    },
+  ],
+} as const;
