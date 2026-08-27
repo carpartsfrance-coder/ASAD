@@ -56,13 +56,6 @@ function releve(form: HTMLFormElement): Point[] {
       rempli: photos > 0,
     },
     {
-      cle: "identification",
-      libelle: "Le numéro d’identification (puce ou tatouage)",
-      onglet: "Identité",
-      bloquant: true,
-      rempli: valeur(form, "identification") !== "",
-    },
-    {
       cle: "sante",
       libelle: "Les cases vacciné / identifié / stérilisé",
       onglet: "Santé",

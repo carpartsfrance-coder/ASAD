@@ -57,7 +57,7 @@ export function sousTitreAnimal(animal: Animal): string {
 
 /** Mention de race conforme au code rural : `null` ⇒ formule explicite. */
 export function libelleRace(animal: Animal): string {
-  return animal.race ?? "N’appartient pas à une race";
+  return animal.race ?? "Non précisée";
 }
 
 /** Résumé de santé affiché dans les informations rapides. */

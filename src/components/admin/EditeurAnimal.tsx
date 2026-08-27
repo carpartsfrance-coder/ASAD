@@ -333,25 +333,8 @@ export function EditeurAnimal({
             <Champ id="age" label="Âge affiché" aide="Tel qu’il apparaîtra sur le site : « 3 ans », « 6 mois »." erreur={erreurs.age}>
               <Texte id="age" name="age" defaultValue={fiche?.age} required />
             </Champ>
-            <Champ id="ageMois" label="Âge en mois" aide="Sert uniquement au filtre du site. 36 pour 3 ans.">
-              <Texte id="ageMois" name="ageMois" type="number" min={0} defaultValue={fiche?.ageMois ?? 0} />
-            </Champ>
-            <Champ id="race" label="Race">
+            <Champ id="race" label="Race" aide="Laissez vide si vous ne la connaissez pas.">
               <Texte id="race" name="race" defaultValue={fiche?.race ?? ""} placeholder="Labrador croisé" />
-            </Champ>
-            <Champ id="sansRace" label="Ou bien" aide="La loi demande d’indiquer explicitement l’absence de race.">
-              <Case
-                id="sansRace"
-                label="N’appartient pas à une race"
-                defaultChecked={fiche ? fiche.race === null : true}
-              />
-            </Champ>
-            <Champ
-              id="identification"
-              label="Numéro d’identification"
-              aide="Puce ou tatouage. Mention obligatoire pour proposer un animal à l’adoption."
-            >
-              <Texte id="identification" name="identification" defaultValue={fiche?.identification} />
             </Champ>
             <Champ id="dateNaissanceEstimee" label="Date de naissance estimée">
               <Texte id="dateNaissanceEstimee" name="dateNaissanceEstimee" type="date" defaultValue={fiche?.dateNaissanceEstimee} />

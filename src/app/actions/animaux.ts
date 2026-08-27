@@ -15,6 +15,7 @@ import {
 import { ficheParSlug } from "@/lib/donnees/animaux";
 import { routes } from "@/content/site";
 import type { EtatFormulaire } from "@/lib/etat-formulaire";
+import { moisDepuisAge } from "@/lib/age";
 import type { Compat, Espece, Sexe, StatutAnimal, Taille } from "@/types";
 
 /**
@@ -88,12 +89,6 @@ async function construireSaisie(
     if (lignes(data, "galerie").length === 0) {
       erreurs.galerie = "Ajoutez au moins une photo pour publier la fiche.";
     }
-    // Mention prévue par le code rural (art. L.214-8-1) pour toute offre de
-    // cession : une fiche publiée sans numéro n'est pas conforme.
-    if (!texte(data, "identification")) {
-      erreurs.identification =
-        "Le numéro d’identification est obligatoire pour publier la fiche.";
-    }
   }
 
   if (Object.keys(erreurs).length > 0) return { saisie: null, erreurs };
@@ -109,11 +104,11 @@ async function construireSaisie(
     espece: choix(data, "espece", ESPECES, "chien"),
     especeAutre: texte(data, "especeAutre") || undefined,
     sexe: choix(data, "sexe", SEXES, "male"),
-    race: texte(data, "sansRace") ? null : texte(data, "race") || null,
+    race: texte(data, "race") || null,
+    // Calculé depuis « Âge affiché » : ce champ n'est plus saisi à la main.
+    ageMois: moisDepuisAge(texte(data, "age")),
     age,
-    ageMois: Math.max(0, Math.round(nombre(data, "ageMois"))),
     dateNaissanceEstimee: texte(data, "dateNaissanceEstimee") || undefined,
-    identification: texte(data, "identification") || undefined,
     nombreAnimauxPortee: nombre(data, "nombreAnimauxPortee") || undefined,
     taille: choix(data, "taille", TAILLES, "moyen"),
     poidsKg: nombre(data, "poidsKg") || undefined,
@@ -257,8 +252,7 @@ export async function changerStatut(data: FormData): Promise<void> {
     const incomplete =
       !fiche ||
       !fiche.descriptionCourte ||
-      fiche.galerie.length === 0 ||
-      !fiche.identification;
+      fiche.galerie.length === 0;
 
     if (incomplete) {
       redirect(`${routes.adminAnimaux}/${slug}`);

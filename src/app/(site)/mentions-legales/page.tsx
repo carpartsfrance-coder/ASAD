@@ -66,11 +66,11 @@ export default function PageMentions() {
 
           <h2>Offres de cession d’animaux</h2>
           <p>
-            Conformément à l’article L.214-8-1 du code rural et de la pêche
-            maritime, chaque fiche d’animal proposé à l’adoption précise l’espèce,
-            le sexe, l’âge, le numéro d’identification et la race — ou la mention
-            « n’appartient pas à une race ». Le nombre d’animaux de la portée est
-            indiqué lorsqu’il s’agit d’une cession de portée.
+            Chaque fiche d’animal proposé à l’adoption précise l’espèce, le
+            sexe, l’âge et la race lorsqu’elle est connue. Le nombre d’animaux de
+            la portée est indiqué lorsqu’il s’agit d’une cession de portée. Le
+            numéro d’identification est communiqué à l’adoptant au moment de la
+            signature du contrat.
           </p>
           <p>
             L’association ne pratique aucune vente d’animaux : les frais demandés

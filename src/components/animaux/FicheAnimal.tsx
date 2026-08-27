@@ -9,7 +9,6 @@ import {
   Mars,
   Minus,
   Ruler,
-  ScanLine,
   Stethoscope,
   Venus,
   X,
@@ -200,11 +199,6 @@ export function ColonneAnimal({ animal }: { animal: Animal }) {
           valeur={libelleRace(animal)}
         />
         <InfoRapide
-          icone={<ScanLine size={19} strokeWidth={1.7} />}
-          etiquette="Identification"
-          valeur={animal.identification ?? "En cours"}
-        />
-        <InfoRapide
           icone={<Stethoscope size={19} strokeWidth={1.7} />}
           etiquette="Santé"
           valeur={resumeSante(animal)}
@@ -341,10 +335,6 @@ export function ColonneAnimal({ animal }: { animal: Animal }) {
           <div className="flex gap-2">
             <dt className="font-semibold text-ink">Race :</dt>
             <dd>{libelleRace(animal)}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="font-semibold text-ink">Identification :</dt>
-            <dd>{animal.identification ?? "En cours"}</dd>
           </div>
           {animal.nombreAnimauxPortee != null && (
             <div className="flex gap-2">

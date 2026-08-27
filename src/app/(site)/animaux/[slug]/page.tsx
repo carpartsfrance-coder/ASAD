@@ -66,9 +66,6 @@ export default async function PageAnimal({
       { "@type": "PropertyValue", name: "Sexe", value: libelleSexe[animal.sexe] },
       { "@type": "PropertyValue", name: "Âge", value: animal.age },
       { "@type": "PropertyValue", name: "Race", value: libelleRace(animal) },
-      ...(animal.identification
-        ? [{ "@type": "PropertyValue", name: "Identification", value: animal.identification }]
-        : []),
     ],
     offers: {
       "@type": "Offer",
