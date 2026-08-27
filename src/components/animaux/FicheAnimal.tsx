@@ -210,16 +210,19 @@ export function ColonneAnimal({ animal }: { animal: Animal }) {
         />
       </dl>
 
-      {/* 1. Histoire */}
-      <Carte titre={`L’histoire ${deNom(animal.nom)}`}>
-        <div className="space-y-3.5">
-          {animal.histoire.map((paragraphe, index) => (
-            <p key={index} className="text-quote leading-[1.75] text-mut">
-              {paragraphe}
-            </p>
-          ))}
-        </div>
-      </Carte>
+      {/* 1. Histoire — seulement sur les fiches qui en ont une.
+             Les nouvelles fiches n'ont qu'une description, saisie plus haut. */}
+      {animal.histoire.length > 0 && (
+        <Carte titre={`L’histoire ${deNom(animal.nom)}`}>
+          <div className="space-y-3.5">
+            {animal.histoire.map((paragraphe, index) => (
+              <p key={index} className="text-quote leading-[1.75] text-mut">
+                {paragraphe}
+              </p>
+            ))}
+          </div>
+        </Carte>
+      )}
 
       {/* 2. Caractère */}
       <Carte titre="Son caractère">

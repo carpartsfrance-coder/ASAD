@@ -8,7 +8,7 @@ import { etatInitial } from "@/lib/etat-formulaire";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { CarteAdmin } from "./primitives";
 import { TeleverseurPhotos } from "./TeleverseurPhotos";
-import { AssistantFiche } from "./AssistantFiche";
+import { BoutonReformuler } from "./BoutonReformuler";
 import { ControlePublication } from "./ControlePublication";
 import { cn } from "@/lib/cn";
 import { routes } from "@/content/site";
@@ -222,8 +222,6 @@ export function EditeurAnimal({
     <form action={action}>
       {fiche && <input type="hidden" name="id" value={fiche.id} />}
 
-      {assistantDisponible && <AssistantFiche nomInitial={fiche?.nom} />}
-
       {/* Parcours : où on en est, et ce qu'on fait à cette étape */}
       <div
         id="parcours-fiche"
@@ -370,21 +368,20 @@ export function EditeurAnimal({
         <div className={panneau("presentation")}>
           <Champ
             id="descriptionCourte"
-            label="Description courte"
-            aide="Deux ou trois phrases. C’est ce qu’on lit en haut de la fiche."
+            label="Description"
+            aide="Qui il est, d’où il vient, son caractère. Quelques phrases suffisent — écrivez comme vous parlez, l’assistant met au propre."
             erreur={erreurs.descriptionCourte}
           >
-            <Zone id="descriptionCourte" name="descriptionCourte" rows={3} defaultValue={fiche?.descriptionCourte} />
+            <Zone id="descriptionCourte" name="descriptionCourte" rows={8} defaultValue={fiche?.descriptionCourte} />
+            {assistantDisponible && <BoutonReformuler champ="descriptionCourte" />}
           </Champ>
-          <Champ id="histoire" label="Son histoire" aide="Un paragraphe par ligne. Appuyez sur Entrée pour en commencer un nouveau.">
-            <Zone id="histoire" name="histoire" rows={7} defaultValue={fiche?.histoire.join("\n")} />
-          </Champ>
+          {/* L'histoire n'est plus saisie séparément : une seule description.
+              La valeur existante est conservée telle quelle. */}
+          <input type="hidden" name="histoire" defaultValue={fiche?.histoire.join("\n") ?? ""} />
           <Champ id="caractere" label="Traits de caractère" aide="Séparés par des virgules : Doux, Joueur, Sociable.">
             <Texte id="caractere" name="caractere" defaultValue={fiche?.caractere.join(", ")} />
           </Champ>
-          <Champ id="caractereNote" label="Précision sur le caractère" aide="Facultatif — un paragraphe sous les mots-clés.">
-            <Zone id="caractereNote" name="caractereNote" rows={3} defaultValue={fiche?.caractereNote} />
-          </Champ>
+          <input type="hidden" name="caractereNote" defaultValue={fiche?.caractereNote ?? ""} />
         </div>
 
         {/* ---------------- Compatibilités ---------------- */}

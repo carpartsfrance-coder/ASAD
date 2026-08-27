@@ -43,7 +43,7 @@ function releve(form: HTMLFormElement): Point[] {
   return [
     {
       cle: "descriptionCourte",
-      libelle: "Une description courte",
+      libelle: "La description",
       onglet: "Présentation",
       bloquant: true,
       rempli: valeur(form, "descriptionCourte") !== "",
@@ -62,13 +62,6 @@ function releve(form: HTMLFormElement): Point[] {
       bloquant: false,
       rempli:
         coche(form, "vaccine") || coche(form, "identifie") || coche(form, "sterilise"),
-    },
-    {
-      cle: "histoire",
-      libelle: "Son histoire",
-      onglet: "Présentation",
-      bloquant: false,
-      rempli: valeur(form, "histoire") !== "",
     },
     {
       cle: "fraisAdoption",
