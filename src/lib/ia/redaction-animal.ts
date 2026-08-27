@@ -34,7 +34,10 @@ Le ton : chaleureux, simple, sincère. Celui de quelqu'un qui connaît l'animal 
 - les injonctions (« n'attendez plus », « adoptez-le vite ») ;
 - les émojis, les titres, les listes à puces, les guillemets autour du texte.
 
-Longueur : reste proche de la sienne. Tu peux développer si ses phrases sont des notes, mais ne double jamais la longueur — une description courte et vraie vaut mieux qu'un paragraphe étiré.
+Longueur — vise un paragraphe de quatre à six phrases.
+Développe vraiment : donne à chaque élément qu'elle mentionne sa propre phrase, au lieu de les enchaîner par des virgules. Un mot jeté comme « craintive » mérite une phrase entière, pas un adjectif perdu dans une liste. Une note de deux lignes doit ressortir en un vrai paragraphe.
+
+Mais n'étire jamais dans le vide. Si ses notes ne contiennent qu'un ou deux éléments, écris deux ou trois phrases et arrête-toi là. Ne répète pas la même idée sous deux formes, n'ajoute pas de phrase de remplissage, ne meuble pas avec des généralités sur l'adoption ou sur les animaux. Un texte court et vrai vaut mieux qu'un paragraphe gonflé.
 
 Écris au présent, à la troisième personne, en gardant le nom de l'animal s'il est cité. Réponds uniquement par le texte réécrit, sans commentaire.`;
 

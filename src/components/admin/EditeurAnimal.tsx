@@ -434,6 +434,33 @@ export function EditeurAnimal({
             erreur={erreurs.descriptionCourte}
           >
             <Zone id="descriptionCourte" name="descriptionCourte" rows={8} defaultValue={fiche?.descriptionCourte} />
+
+            {/*
+              L'assistant ne peut développer que ce qu'on lui donne : plus la
+              bénévole cite d'éléments, plus le texte final sera riche. Ce
+              rappel remplace les quatre champs qu'on lui a retirés.
+            */}
+            <ul className="mt-2.5 flex flex-wrap gap-x-2 gap-y-1 text-mini text-mut">
+              <li className="w-full font-semibold text-ink">
+                Plus vous en dites, plus le texte sera joli. Si vous les
+                connaissez :
+              </li>
+              {[
+                "d’où il vient",
+                "son caractère",
+                "ce qu’il aime",
+                "avec qui il s’entend",
+                "sa vie chez sa famille d’accueil",
+              ].map((point) => (
+                <li
+                  key={point}
+                  className="rounded-full bg-subtil px-2.5 py-1 whitespace-nowrap"
+                >
+                  {point}
+                </li>
+              ))}
+            </ul>
+
             {assistantDisponible && <BoutonReformuler champ="descriptionCourte" />}
           </Champ>
 
