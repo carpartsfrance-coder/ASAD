@@ -430,7 +430,7 @@ export function EditeurAnimal({
             id="descriptionCourte"
             manquant={aRemplir("descriptionCourte")}
             label="Description"
-            aide="Qui il est, d’où il vient, son caractère. Quelques phrases suffisent — écrivez comme vous parlez, l’assistant met au propre."
+            aide="Qui il est, d’où il vient, son caractère. Écrivez comme vous parlez, même en vrac : l’assistant se charge de rendre ça joli."
             erreur={erreurs.descriptionCourte}
           >
             <Zone id="descriptionCourte" name="descriptionCourte" rows={8} defaultValue={fiche?.descriptionCourte} />

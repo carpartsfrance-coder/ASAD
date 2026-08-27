@@ -6,11 +6,12 @@ import { reformuler } from "@/app/actions/assistant";
 import { cn } from "@/lib/cn";
 
 /**
- * Met au propre le texte déjà écrit dans la description.
+ * Réécrit le texte déjà saisi dans la description.
  *
- * L'assistant ne remplit pas la fiche et n'ajoute rien : il reprend les
- * phrases de la bénévole. Le résultat arrive dans le champ, où il reste
- * modifiable, et « Annuler » remet son texte d'origine.
+ * L'assistant ne remplit pas la fiche et n'ajoute aucun fait : il reprend les
+ * phrases de la bénévole et les rend plus belles. Le résultat arrive dans le
+ * champ, où il reste modifiable, et « Revenir à mon texte » restaure sa
+ * version d'origine.
  */
 export function BoutonReformuler({ champ }: { champ: string }) {
   const ancre = useRef<HTMLDivElement>(null);
@@ -84,7 +85,7 @@ export function BoutonReformuler({ champ }: { champ: string }) {
           )}
         >
           <Sparkles size={15} strokeWidth={1.9} aria-hidden="true" />
-          {enCours ? "Je relis…" : "Mettre au propre"}
+          {enCours ? "J’écris…" : "Embellir le texte"}
         </button>
 
         {reformule && (
@@ -100,8 +101,8 @@ export function BoutonReformuler({ champ }: { champ: string }) {
 
         <span className="text-tiny text-mut">
           {reformule
-            ? "Relisez : l’assistant corrige le style, il n’ajoute rien."
-            : "Corrige l’orthographe et les tournures, sans rien inventer."}
+            ? "Relisez : la forme change, les faits restent les vôtres."
+            : "Reprend votre texte pour le rendre plus joli — sans jamais rien inventer."}
         </span>
       </div>
 
