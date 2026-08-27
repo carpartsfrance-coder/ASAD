@@ -9,7 +9,7 @@ import { medias } from "@/db/schema";
  * donc être mise en cache indéfiniment par le navigateur et par le CDN.
  */
 export async function GET(
-  _requete: Request,
+  requete: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
@@ -33,8 +33,10 @@ export async function GET(
   }
 
   // Média enregistré sous forme d'adresse : on y renvoie.
+  // La base est celle de la requête en cours — jamais une adresse codée en
+  // dur, sinon la redirection pointe vers localhost une fois en ligne.
   if (!ligne.donnees && ligne.url) {
-    return Response.redirect(new URL(ligne.url, "http://localhost"), 302);
+    return Response.redirect(new URL(ligne.url, requete.url), 302);
   }
 
   if (!ligne.donnees) {
