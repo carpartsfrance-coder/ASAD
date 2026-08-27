@@ -21,7 +21,7 @@ export function CoquilleAdmin({
   return (
     /* Le back-office garde un fond légèrement teinté : ses cartes sont
        blanches, elles se détacheraient mal sur du blanc pur. */
-    <div className="flex min-h-screen bg-subtil">
+    <div className="zone-admin flex min-h-screen bg-subtil">
       {/* Barre latérale fixe en desktop */}
       <aside className="sticky top-0 hidden h-screen lg:block">
         <SidebarAdmin utilisateur={utilisateur} compteurs={compteurs} />

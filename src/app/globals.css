@@ -225,3 +225,41 @@ li {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+/* ------------------------------------------------------------------
+   Back-office : mêmes rôles typographiques, mais plus lisibles.
+
+   Le site public garde son échelle. Ici les textes sont agrandis d'environ
+   deux points : le back-office est tenu au quotidien par une bénévole de
+   65 ans, et un formulaire long en 13 px se lit mal.
+
+   Les utilitaires Tailwind pointent sur ces variables (`.text-meta` vaut
+   `font-size: var(--text-meta)`) : les redéfinir dans cette portée suffit,
+   aucun composant n'est à retoucher.
+   ------------------------------------------------------------------ */
+.zone-admin {
+  --text-tiny: 14px;
+  --text-mini: 14.5px;
+  --text-meta: 15.5px;
+  --text-body: 16.5px;
+  --text-nav: 16.5px;
+  --text-lead: 17px;
+  --text-quote: 17px;
+  --text-card: 20px;
+  --text-title: 26px;
+}
+
+/* Les libellés de formulaire portent l'essentiel de la lecture. */
+.zone-admin label {
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+/*
+ * Gris secondaire assombri dans le back-office : le petit texte gris clair
+ * est le premier à devenir illisible avec l'âge. 8,6:1 sur blanc, contre
+ * 5,7:1 pour le gris du site public.
+ */
+.zone-admin {
+  --color-mut: #4a4a4a;
+}
