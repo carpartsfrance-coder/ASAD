@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BandeauConfirmation } from "@/components/admin/BandeauConfirmation";
+import { assistantDisponible } from "@/lib/ia/redaction-animal";
 import { EditeurAnimal } from "@/components/admin/EditeurAnimal";
 import { EnTetePageAdmin, PiluleStatut } from "@/components/admin/primitives";
 import { exigerCapacite } from "@/lib/auth/garde";
@@ -57,7 +58,7 @@ export default async function PageFicheAdmin({
       />
 
       <div className="mt-6">
-        <EditeurAnimal fiche={fiche} />
+        <EditeurAnimal fiche={fiche} assistantDisponible={assistantDisponible()} />
       </div>
     </>
   );

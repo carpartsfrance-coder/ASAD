@@ -411,6 +411,52 @@ sitemap en dépendent.
 
 ---
 
+## Assistant de rédaction (facultatif)
+
+Dans le back-office, l'éditeur d'une fiche animal affiche un encadré
+**« Vous préférez raconter ? »**. La bénévole y écrit ce qu'elle sait de
+l'animal avec ses mots ; l'assistant remplit à sa place la description,
+l'histoire, les traits de caractère, la taille et les compatibilités.
+
+Rien n'est enregistré : les valeurs sont **posées dans le formulaire**, où elles
+sont relues et corrigées. Un bouton « Annuler » remet les valeurs précédentes.
+
+### La règle de fond
+
+**L'assistant n'invente jamais un fait.** Il reformule uniquement ce qui figure
+dans les notes ; si une information n'y est pas, le champ reste vide et
+l'encadré le dit explicitement (« Laissé vide, faute d'information dans vos
+notes »).
+
+Il ne touche jamais aux champs suivants, qui restent saisis à la main :
+
+- **nom, espèce, sexe, âge, race, identification, nombre d'animaux de la
+  portée** — ce sont les mentions prévues par le code rural (art. L.214-8-1) ;
+- **vacciné, identifié, stérilisé** — ce sont des affirmations sanitaires qui
+  engagent l'association.
+
+### Activer
+
+Créer une clé sur <https://platform.openai.com/api-keys>, puis la poser dans
+Render (service `asad` → *Environment*) :
+
+```
+OPENAI_API_KEY = sk-...
+```
+
+Sans cette clé, l'encadré n'apparaît pas et le back-office fonctionne
+exactement comme avant.
+
+Le modèle par défaut est `gpt-5.6-terra` ; `OPENAI_MODEL` permet d'en choisir un
+autre (`gpt-5.6-luna` coûte moins cher, `gpt-5.6-sol` écrit un peu mieux).
+À raison d'une fiche par jour, la dépense reste de l'ordre de quelques
+centimes par mois.
+
+L'action serveur revérifie les droits à chaque appel : seul un compte ayant le
+droit d'écrire sur les animaux peut déclencher l'assistant.
+
+---
+
 ## Mettre en ligne sur Render
 
 Le dépôt contient un fichier [`render.yaml`](render.yaml) : Render lit tout seul

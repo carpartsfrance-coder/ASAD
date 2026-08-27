@@ -8,6 +8,7 @@ import { etatInitial } from "@/lib/etat-formulaire";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { CarteAdmin } from "./primitives";
 import { TeleverseurPhotos } from "./TeleverseurPhotos";
+import { AssistantFiche } from "./AssistantFiche";
 import { cn } from "@/lib/cn";
 import { routes } from "@/content/site";
 import type { Animal } from "@/types";
@@ -135,7 +136,14 @@ const OPTIONS_STATUT = [
 /* Éditeur                                                             */
 /* ------------------------------------------------------------------ */
 
-export function EditeurAnimal({ fiche }: { fiche?: Animal }) {
+export function EditeurAnimal({
+  fiche,
+  assistantDisponible = false,
+}: {
+  fiche?: Animal;
+  /** L'assistant de rédaction n'apparaît que si une clé OpenAI est configurée. */
+  assistantDisponible?: boolean;
+}) {
   const [onglet, setOnglet] = useState<CleOnglet>("identite");
   const [statut, setStatut] = useState(fiche?.statut ?? "brouillon");
   const [etat, action, enCours] = useActionState(enregistrerFiche, etatInitial);
@@ -150,6 +158,8 @@ export function EditeurAnimal({ fiche }: { fiche?: Animal }) {
   return (
     <form action={action}>
       {fiche && <input type="hidden" name="id" value={fiche.id} />}
+
+      {assistantDisponible && <AssistantFiche nomInitial={fiche?.nom} />}
 
       {/* Onglets */}
       <div role="tablist" aria-label="Sections de la fiche" className="flex flex-wrap gap-2">

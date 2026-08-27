@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { assistantDisponible } from "@/lib/ia/redaction-animal";
 import { EditeurAnimal } from "@/components/admin/EditeurAnimal";
 import { EnTetePageAdmin } from "@/components/admin/primitives";
 import { exigerCapacite } from "@/lib/auth/garde";
@@ -15,7 +16,7 @@ export default async function PageNouvelAnimal() {
         sousTitre="La fiche est créée en brouillon : elle n’apparaît sur le site que lorsque vous la publiez."
       />
       <div className="mt-6">
-        <EditeurAnimal />
+        <EditeurAnimal assistantDisponible={assistantDisponible()} />
       </div>
     </>
   );
