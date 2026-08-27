@@ -69,8 +69,11 @@ export default async function PageAnimal({
     ],
     offers: {
       "@type": "Offer",
-      price: animal.fraisAdoption,
-      priceCurrency: "EUR",
+      /*
+       * Aucun prix : la fiche n'en affiche plus, et l'association ne vend pas
+       * d'animaux. Annoncer un montant aux moteurs alors que la page n'en
+       * montre aucun serait à la fois faux et incohérent.
+       */
       availability:
         animal.statut === "a_adopter" || animal.statut === "urgent"
           ? "https://schema.org/InStock"

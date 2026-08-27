@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Puce } from "@/components/ui/Badge";
 import { SmartLink } from "@/components/ui/SmartLink";
-import { deNom, formatDate, formatEuros } from "@/lib/format";
+import { deNom, formatDate } from "@/lib/format";
 import {
   libelleCompat,
   libelleEspeceAccordee,
@@ -297,11 +297,7 @@ export function ColonneAnimal({ animal }: { animal: Animal }) {
       {/* 6. Conditions d'adoption */}
       {animal.conditions.length > 0 && (
         <Carte titre="Conditions d’adoption">
-          <p className="text-quote leading-[1.75] text-mut">
-            Participation aux frais engagés par l’association :{" "}
-            <strong className="font-bold text-ink">{formatEuros(animal.fraisAdoption)}</strong>.
-          </p>
-          <ol className="mt-5 space-y-4">
+          <ol className="space-y-4">
             {animal.conditions.map((etape, index) => (
               <li key={etape.titre} className="flex gap-4">
                 <span
@@ -394,10 +390,6 @@ export function EncadreAnimal({ animal }: { animal: Animal }) {
         <dl className="mt-5">
           <LigneEncadre libelle="Statut" valeur={libelleStatut[animal.statut]} />
           <LigneEncadre libelle="Localisation" valeur={animal.commune} />
-          <LigneEncadre
-            libelle="Frais d’adoption"
-            valeur={formatEuros(animal.fraisAdoption)}
-          />
           <LigneEncadre libelle="Réponse sous" valeur="5 jours ouvrés" />
         </dl>
 

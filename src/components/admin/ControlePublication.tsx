@@ -30,10 +30,6 @@ function valeur(form: HTMLFormElement, nom: string): string {
     : "";
 }
 
-function coche(form: HTMLFormElement, nom: string): boolean {
-  const el = form.elements.namedItem(nom);
-  return el instanceof HTMLInputElement ? el.checked : false;
-}
 
 function releve(form: HTMLFormElement): Point[] {
   const photos = valeur(form, "galerie")
@@ -56,12 +52,22 @@ function releve(form: HTMLFormElement): Point[] {
       rempli: photos > 0,
     },
     {
+      cle: "compatibilites",
+      libelle: "Les trois compatibilités (chiens, chats, enfants)",
+      onglet: "Compatibilités",
+      bloquant: true,
+      rempli: ["compatChiens", "compatChats", "compatEnfants"].every(
+        (c) => valeur(form, c) !== "",
+      ),
+    },
+    {
       cle: "sante",
-      libelle: "Les cases vacciné / identifié / stérilisé",
+      libelle: "Identifié, vacciné, stérilisé",
       onglet: "Santé",
-      bloquant: false,
-      rempli:
-        coche(form, "vaccine") || coche(form, "identifie") || coche(form, "sterilise"),
+      bloquant: true,
+      rempli: ["identifie", "vaccine", "sterilise"].every(
+        (c) => valeur(form, c) !== "",
+      ),
     },
     {
       cle: "fraisAdoption",

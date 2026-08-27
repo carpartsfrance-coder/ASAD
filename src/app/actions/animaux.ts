@@ -89,6 +89,26 @@ async function construireSaisie(
     if (lignes(data, "galerie").length === 0) {
       erreurs.galerie = "Ajoutez au moins une photo pour publier la fiche.";
     }
+
+    /*
+     * Compatibilités et santé : sans réponse explicite, la fiche affichait
+     * « À tester » et « non » par défaut — des affirmations que personne
+     * n'avait décidées. Il faut trancher avant de publier.
+     */
+    const aRepondre: Array<[string, string]> = [
+      ["compatChiens", "la compatibilité avec les chiens"],
+      ["compatChats", "la compatibilité avec les chats"],
+      ["compatEnfants", "la compatibilité avec les enfants"],
+      ["identifie", "si l’animal est identifié"],
+      ["vaccine", "s’il est vacciné"],
+      ["sterilise", "s’il est stérilisé"],
+    ];
+
+    for (const [champ, libelle] of aRepondre) {
+      if (!texte(data, champ)) {
+        erreurs[champ] = `Précisez ${libelle} pour publier la fiche.`;
+      }
+    }
   }
 
   if (Object.keys(erreurs).length > 0) return { saisie: null, erreurs };
@@ -129,9 +149,9 @@ async function construireSaisie(
       enfants: texte(data, "compatNoteEnfants") || undefined,
     },
     sante: {
-      identifie: coche(data, "identifie"),
-      vaccine: coche(data, "vaccine"),
-      sterilise: coche(data, "sterilise"),
+      identifie: texte(data, "identifie") === "oui",
+      vaccine: texte(data, "vaccine") === "oui",
+      sterilise: texte(data, "sterilise") === "oui",
       resume: texte(data, "santeResume") || undefined,
       traitement: texte(data, "traitement") || undefined,
     },

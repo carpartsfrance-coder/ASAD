@@ -177,7 +177,15 @@ type CleOnglet = (typeof ONGLETS)[number]["cle"];
 /** « essentiel » est l'écran d'entrée, pas une étape du complément. */
 type Vue = CleOnglet | "essentiel";
 
+/** Réponse oui/non explicite : rien n'est coché à l'avance. */
+const OPTIONS_OUI_NON = [
+  { valeur: "", label: "— À préciser —" },
+  { valeur: "oui", label: "Oui" },
+  { valeur: "non", label: "Non" },
+];
+
 const OPTIONS_COMPAT = [
+  { valeur: "", label: "— À préciser —" },
   { valeur: "oui", label: "Oui" },
   { valeur: "non", label: "Non" },
   { valeur: "a_tester", label: "À tester" },
@@ -236,7 +244,18 @@ export function EditeurAnimal({
           : false;
       };
       setManquants(
-        ["nom", "age", "commune", "descriptionCourte"].filter(vide),
+        [
+          "nom",
+          "age",
+          "commune",
+          "descriptionCourte",
+          "compatChiens",
+          "compatChats",
+          "compatEnfants",
+          "identifie",
+          "vaccine",
+          "sterilise",
+        ].filter(vide),
       );
     };
 
@@ -501,8 +520,8 @@ export function EditeurAnimal({
             const champ = `compat${cle.charAt(0).toUpperCase()}${cle.slice(1)}`;
             return (
               <div key={cle} className="grid gap-5 sm:grid-cols-[220px_1fr]">
-                <Champ id={champ} label={label}>
-                  <Liste id={champ} name={champ} defaultValue={valeur ?? "a_tester"} options={OPTIONS_COMPAT} />
+                <Champ id={champ} label={label} manquant={aRemplir(champ)}>
+                  <Liste id={champ} name={champ} defaultValue={fiche ? (valeur ?? "a_tester") : ""} options={OPTIONS_COMPAT} />
                 </Champ>
                 <Champ id={`compatNote${cle}`} label="Précision" aide="Facultatif — affiché à côté de la réponse.">
                   <Texte
@@ -518,10 +537,27 @@ export function EditeurAnimal({
 
         {/* ---------------- Santé ---------------- */}
         <div className={panneau("sante")}>
-          <div className="space-y-3">
-            <Case id="identifie" label="Identifié (puce ou tatouage)" defaultChecked={fiche?.sante.identifie} />
-            <Case id="vaccine" label="Vacciné" defaultChecked={fiche?.sante.vaccine} />
-            <Case id="sterilise" label="Stérilisé" defaultChecked={fiche?.sante.sterilise} />
+          {/*
+            Trois listes plutôt que trois cases à cocher : une case décochée
+            répond « non » sans qu'on ait rien décidé. Ici il faut choisir.
+          */}
+          <div className="grid gap-5 sm:grid-cols-3">
+            {(
+              [
+                ["identifie", "Identifié", fiche?.sante.identifie],
+                ["vaccine", "Vacciné", fiche?.sante.vaccine],
+                ["sterilise", "Stérilisé", fiche?.sante.sterilise],
+              ] as const
+            ).map(([cle, label, valeur]) => (
+              <Champ key={cle} id={cle} label={label} manquant={aRemplir(cle)}>
+                <Liste
+                  id={cle}
+                  name={cle}
+                  defaultValue={fiche ? (valeur ? "oui" : "non") : ""}
+                  options={OPTIONS_OUI_NON}
+                />
+              </Champ>
+            ))}
           </div>
           <Champ id="santeResume" label="État de santé" aide="Une phrase, affichée sur la fiche.">
             <Zone id="santeResume" name="santeResume" rows={2} defaultValue={fiche?.sante.resume} />
