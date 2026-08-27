@@ -141,6 +141,22 @@ export async function animauxDisponibles(): Promise<Animal[]> {
   return assembler(lignes);
 }
 
+/**
+ * Animaux qui ont trouvé une famille.
+ *
+ * Leur fiche n'est jamais supprimée : elle passe en « adopté » et reste en
+ * ligne. Triés du plus récemment adopté au plus ancien.
+ */
+export async function animauxAdoptes(): Promise<Animal[]> {
+  const lignes = await db
+    .select()
+    .from(tAnimaux)
+    .where(eq(tAnimaux.statut, "adopte"))
+    .orderBy(desc(tAnimaux.adoptionDate), desc(tAnimaux.datePublication));
+
+  return assembler(lignes);
+}
+
 export async function animauxUrgents(limite?: number): Promise<Animal[]> {
   const requete = db
     .select()

@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { url: routes.rejoindre, priority: 0.8, changeFrequency: "monthly" },
       { url: routes.aider, priority: 0.7, changeFrequency: "monthly" },
       { url: routes.association, priority: 0.7, changeFrequency: "monthly" },
+      { url: routes.adoptes, priority: 0.7, changeFrequency: "weekly" },
       { url: routes.livreOr, priority: 0.6, changeFrequency: "weekly" },
       { url: routes.signaler, priority: 0.6, changeFrequency: "yearly" },
       { url: routes.contact, priority: 0.6, changeFrequency: "yearly" },

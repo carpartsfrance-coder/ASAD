@@ -103,6 +103,7 @@ export const routes = {
   don: "/don",
   rejoindre: "/rejoindre",
   signaler: "/signaler",
+  adoptes: "/adoptes",
   livreOr: "/livre-or",
   contact: "/contact",
   mentions: "/mentions-legales",
@@ -139,6 +140,7 @@ export const navigationPrincipale: LienNav[] = [
   { label: "Nos animaux", href: routes.animaux },
   { label: "L’association", href: routes.association },
   { label: "Nous aider", href: routes.aider },
+  { label: "Adoptés", href: routes.adoptes },
   { label: "Livre d’or", href: routes.livreOr },
 ];
 
