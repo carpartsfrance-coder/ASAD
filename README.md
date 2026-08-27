@@ -411,6 +411,95 @@ sitemap en dépendent.
 
 ---
 
+## Mettre en ligne sur Render
+
+Le dépôt contient un fichier [`render.yaml`](render.yaml) : Render lit tout seul
+ce qu'il faut créer. Cinq étapes, une seule fois.
+
+### 1. Envoyer le code sur GitHub
+
+Le dossier est déjà un dépôt Git avec un premier commit. Créer un dépôt **privé**
+vide sur GitHub, puis :
+
+```bash
+git remote add origin https://github.com/<compte>/asad.git
+git push -u origin main
+```
+
+### 2. Créer le site sur Render
+
+Sur <https://dashboard.render.com> : **New → Blueprint**, choisir le dépôt `asad`.
+
+Render lit `render.yaml` et propose de créer deux choses :
+
+- **asad-base** — la base de données PostgreSQL ;
+- **asad** — le site.
+
+Le prix s'affiche avant validation.
+
+> ⚠️ Les plans inscrits dans `render.yaml` sont **payants**, volontairement.
+> En gratuit, Render **supprime la base 30 jours après sa création** (14 jours
+> de sursis pour la sauver), et le site s'éteint après 15 minutes sans visite —
+> il met environ une minute à redémarrer pour le visiteur suivant.
+
+Render branche automatiquement `DATABASE_URL` et génère `ASAD_AUTH_SECRET`.
+Rien à recopier à la main.
+
+### 3. Copier le contenu vers Render
+
+Le premier déploiement crée les tables, mais elles sont **vides** : les animaux,
+le livre d'or, les textes du site et les comptes du back-office sont encore sur
+la machine locale. Une seule commande les transfère.
+
+Dans Render, ouvrir la base **asad-base** et copier son *External Database URL*,
+puis :
+
+```bash
+npm run db:exporter
+npm run db:importer -- "<External Database URL>"
+```
+
+Le script affiche le nombre de lignes copiées par table. `sauvegarde-asad.sql`
+reste sur la machine : il contient des données personnelles et n'est jamais
+versionné.
+
+### 4. Renseigner l'adresse du site
+
+Dans Render, service **asad** → *Environment* → ajouter :
+
+```
+NEXT_PUBLIC_SITE_URL = https://asad.onrender.com
+```
+
+(puis l'adresse définitive le jour où le domaine `asad.fr` est branché).
+Elle sert au plan de site et aux aperçus de partage.
+
+### 5. Se connecter au back-office
+
+`https://<adresse-du-site>/admin`, avec les identifiants déjà créés en local —
+ils font partie du contenu copié à l'étape 3.
+
+---
+
+### Ce qui se passe à chaque mise à jour
+
+```bash
+git push
+```
+
+Render redéploie tout seul. Au démarrage, `npm start` applique d'abord les
+migrations de base de données, puis lance le site : la base suit toujours le
+code, sans manipulation.
+
+### Sauvegarder la base
+
+Le plan payant inclut les sauvegardes automatiques de Render. Pour une copie
+sur la machine, à tout moment :
+
+```bash
+DATABASE_URL="<External Database URL>" npm run db:exporter
+```
+
 ## Reste à faire
 
 ### Avant la mise en production
