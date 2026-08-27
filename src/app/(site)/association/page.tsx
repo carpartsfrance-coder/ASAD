@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { pageAssociation } from "@/content/pages";
 import { statistiques } from "@/content/statistiques";
 import { association, routes } from "@/content/site";
+import { configSite } from "@/lib/donnees/config-site";
 
 export const metadata: Metadata = {
   title: "L’association",
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
   alternates: { canonical: routes.association },
 };
 
-export default function PageAssociation() {
+export default async function PageAssociation() {
+  const config = await configSite();
+
   return (
     <>
       <Container className="pt-8">
@@ -29,7 +32,7 @@ export default function PageAssociation() {
         surtitre={association.formeJuridique}
         titre={pageAssociation.titre}
         chapo={pageAssociation.chapo}
-        photo={pageAssociation.photo}
+        photo={config.photos.association}
       />
 
       <Container className="pt-14 lg:pt-16">

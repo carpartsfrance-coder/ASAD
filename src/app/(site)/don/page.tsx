@@ -10,6 +10,7 @@ import { lienDon, montantsDon } from "@/content/aider";
 import { pageDon } from "@/content/pages";
 import { helloAsso, routes } from "@/content/site";
 import { formatEuros } from "@/lib/format";
+import { configSite } from "@/lib/donnees/config-site";
 
 export const metadata: Metadata = {
   title: "Faire un don",
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
   alternates: { canonical: routes.don },
 };
 
-export default function PageFaireUnDon() {
+export default async function PageFaireUnDon() {
+  const config = await configSite();
+
   return (
     <>
       <Container className="pt-8">
@@ -33,7 +36,7 @@ export default function PageFaireUnDon() {
         surtitre="Dons"
         titre={pageDon.titre}
         chapo={pageDon.chapo}
-        photo={pageDon.photo}
+        photo={config.photos.don}
       >
         <div className="flex flex-wrap gap-4">
           <Button

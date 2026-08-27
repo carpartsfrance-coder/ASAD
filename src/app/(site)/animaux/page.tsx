@@ -9,6 +9,7 @@ import { pageCatalogue } from "@/content/pages";
 import { routes } from "@/content/site";
 import { type FiltresAnimaux } from "@/lib/animaux";
 import { animauxCatalogue } from "@/lib/donnees/animaux";
+import { configSite } from "@/lib/donnees/config-site";
 
 export const metadata: Metadata = {
   title: "Nos animaux à adopter",
@@ -40,6 +41,8 @@ export default async function PageAnimaux({
     recherche: lire("recherche"),
     tri: lire("tri") as FiltresAnimaux["tri"],
   };
+
+  const config = await configSite();
 
   const pageInitiale = Math.max(1, Number(lire("page") ?? 1) || 1);
 
@@ -135,8 +138,8 @@ export default async function PageAnimaux({
         <div className="grid items-center gap-7 rounded-panel bg-warm p-5 sm:p-[22px] lg:grid-cols-[0.62fr_1fr] lg:gap-10">
           <div className="relative h-[220px] overflow-hidden rounded-media bg-black/5 lg:h-[258px]">
             <Image
-              src={pageCatalogue.encartFinal.photo.src}
-              alt={pageCatalogue.encartFinal.photo.alt}
+              src={config.photos.adoption.src}
+              alt={config.photos.adoption.alt}
               fill
               sizes="(max-width: 1024px) 100vw, 38vw"
               loading="lazy"

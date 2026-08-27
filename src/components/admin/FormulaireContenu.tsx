@@ -6,12 +6,23 @@ import { sauverContenu } from "@/app/actions/contenu";
 import { etatInitial } from "@/lib/etat-formulaire";
 import { CarteAdmin } from "./primitives";
 import { ChampAdmin, TexteAdmin, ZoneAdmin } from "./ChampsAdmin";
+import { ChampPhoto, type ValeurPhoto } from "./ChampPhoto";
 
 export interface EntreeContenu {
   cle: string;
   libelle: string;
   rubrique: string;
   valeur: unknown;
+}
+
+/** Reconnaît une valeur de photo : un objet portant une adresse `src`. */
+function estPhoto(valeur: unknown): valeur is ValeurPhoto {
+  return (
+    typeof valeur === "object" &&
+    valeur !== null &&
+    !Array.isArray(valeur) &&
+    typeof (valeur as { src?: unknown }).src === "string"
+  );
 }
 
 /** Édition des textes du site : une ligne par réglage. */
@@ -60,6 +71,19 @@ export function FormulaireContenu({
 
             <div className="mt-5 space-y-5">
               {lignes.map((entree) => {
+                /* Une valeur qui porte une adresse d'image se règle avec un
+                   vrai sélecteur de photo, pas en modifiant du JSON. */
+                if (estPhoto(entree.valeur)) {
+                  return (
+                    <ChampPhoto
+                      key={entree.cle}
+                      cle={entree.cle}
+                      libelle={entree.libelle}
+                      valeur={entree.valeur}
+                    />
+                  );
+                }
+
                 const estTexte = typeof entree.valeur === "string";
                 const valeur = estTexte
                   ? (entree.valeur as string)

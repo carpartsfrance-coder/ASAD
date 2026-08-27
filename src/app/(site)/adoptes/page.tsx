@@ -15,6 +15,7 @@ import { animauxAdoptes, animauxDisponibles } from "@/lib/donnees/animaux";
 import { pageAdoptes } from "@/content/pages";
 import { helloAsso, routes } from "@/content/site";
 import type { Animal } from "@/types";
+import { configSite } from "@/lib/donnees/config-site";
 
 export const metadata: Metadata = {
   title: "Ils ont trouvé leur famille",
@@ -92,11 +93,9 @@ export default async function PageAdoptes() {
   const adoptes = await animauxAdoptes();
   const disponibles = (await animauxDisponibles()).slice(0, 3);
 
-  /* Mosaïque du héro : les photos des adoptés, complétées si besoin. */
-  const mosaique = [...adoptes, ...disponibles]
-    .map((a) => a.galerie[0])
-    .filter(Boolean)
-    .slice(0, 4);
+  /* Mosaïque du héro : quatre photos réglées depuis le back-office. */
+  const config = await configSite();
+  const mosaique = config.photos.adoptes.filter((p) => p?.src).slice(0, 4);
 
   return (
     <>
