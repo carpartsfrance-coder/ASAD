@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
@@ -24,8 +24,28 @@ export function Header({ lienDon }: { lienDon: string }) {
 
   const fermer = useCallback(() => setMenuOuvert(false), []);
 
+  /**
+   * L'en-tête reste visible pendant qu'on descend : la navigation et le
+   * bouton de don restent à portée. Le filet et l'ombre n'apparaissent qu'une
+   * fois la page défilée, pour ne pas alourdir le haut de l'accueil.
+   */
+  const [decolle, setDecolle] = useState(false);
+
+  useEffect(() => {
+    const auDefilement = () => setDecolle(window.scrollY > 8);
+    auDefilement();
+    window.addEventListener("scroll", auDefilement, { passive: true });
+    return () => window.removeEventListener("scroll", auDefilement);
+  }, []);
+
   return (
     <>
+      <div
+        className={cn(
+          "sticky top-0 z-40 bg-canvas transition-shadow duration-200",
+          decolle && "border-b border-line shadow-[0_2px_12px_rgba(20,32,24,.06)]",
+        )}
+      >
       <Container as="header" className="flex items-center gap-6 py-4 lg:gap-11 lg:py-[18px]">
         <SmartLink
           href={routes.accueil}
@@ -91,6 +111,7 @@ export function Header({ lienDon }: { lienDon: string }) {
           </button>
         </div>
       </Container>
+      </div>
 
       <MobileMenu
         ouvert={menuOuvert}

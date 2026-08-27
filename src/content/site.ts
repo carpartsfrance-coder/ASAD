@@ -17,7 +17,7 @@ export const association = {
   nomComplet: "ASAD — Association Sauvetage Animaux en Détresse",
   /** Le nom déployé seul, tel qu'il figure sous le logo. */
   signification: "Association Sauvetage Animaux en Détresse",
-  baseline: "Association de protection animale 100 % bénévole — Bouches-du-Rhône",
+  baseline: "Association de protection animale 100 % bénévole — Hérault et Gard",
   description:
     "Association de protection animale 100 % bénévole. Nous recueillons les animaux abandonnés, les confions à des familles d’accueil et leur trouvons une famille pour la vie.",
   email: "Asad13@wanadoo.fr",
@@ -30,8 +30,12 @@ export const association = {
     ville: "Châteauneuf-les-Martigues",
     pays: "France",
   },
-  /** Départements d'intervention. */
-  territoire: "Bouches-du-Rhône",
+  /**
+   * Départements d'intervention — vérifié sur les fiches : les animaux sont
+   * tous placés dans l'Hérault (34) et le Gard (30).
+   * À ne pas déduire de l'adresse du siège, qui est déclarée dans le 13.
+   */
+  territoire: "Hérault et Gard",
   /** Numéro RNA (registre national des associations) — à compléter. */
   rna: "W000000000",
   /** Association loi 1901. */
