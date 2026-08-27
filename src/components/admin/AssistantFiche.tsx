@@ -17,10 +17,10 @@ import { cn } from "@/lib/cn";
 
 /** Champs remplis, avec leur libellé et l'onglet où les relire. */
 const CHAMPS: Array<{ nom: keyof FicheRedigee; label: string; onglet: string }> = [
-  { nom: "descriptionCourte", label: "Description courte", onglet: "Description" },
-  { nom: "histoire", label: "Son histoire", onglet: "Description" },
-  { nom: "caractere", label: "Traits de caractère", onglet: "Description" },
-  { nom: "caractereNote", label: "Précision sur le caractère", onglet: "Description" },
+  { nom: "descriptionCourte", label: "Description courte", onglet: "Présentation" },
+  { nom: "histoire", label: "Son histoire", onglet: "Présentation" },
+  { nom: "caractere", label: "Traits de caractère", onglet: "Présentation" },
+  { nom: "caractereNote", label: "Précision sur le caractère", onglet: "Présentation" },
   { nom: "taille", label: "Taille", onglet: "Identité" },
   { nom: "compatChiens", label: "Avec les chiens", onglet: "Compatibilités" },
   { nom: "compatChats", label: "Avec les chats", onglet: "Compatibilités" },

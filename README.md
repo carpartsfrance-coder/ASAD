@@ -435,6 +435,22 @@ Il ne touche jamais aux champs suivants, qui restent saisis à la main :
 - **vacciné, identifié, stérilisé** — ce sont des affirmations sanitaires qui
   engagent l'association.
 
+### Le contrôle « Avant de publier »
+
+L'assistant ne remplit volontairement ni les photos, ni le numéro
+d'identification, ni les cases de santé. Un panneau en bas du formulaire liste
+donc en direct ce qui manque encore, en séparant deux choses :
+
+- **ce qui bloque la publication** — description courte, au moins une photo et
+  le numéro d'identification (mention exigée par le code rural pour toute
+  offre de cession) ;
+- **ce qui mérite un coup d'œil** sans empêcher l'enregistrement — les cases
+  vacciné / identifié / stérilisé, l'histoire, les frais d'adoption.
+
+Chaque ligne indique l'onglet où aller. Le contrôle est aussi appliqué côté
+serveur : une fiche incomplète ne peut pas être publiée, même en changeant son
+statut depuis la liste.
+
 ### Activer
 
 Créer une clé sur <https://platform.openai.com/api-keys>, puis la poser dans

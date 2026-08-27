@@ -9,6 +9,7 @@ import { SmartLink } from "@/components/ui/SmartLink";
 import { CarteAdmin } from "./primitives";
 import { TeleverseurPhotos } from "./TeleverseurPhotos";
 import { AssistantFiche } from "./AssistantFiche";
+import { ControlePublication } from "./ControlePublication";
 import { cn } from "@/lib/cn";
 import { routes } from "@/content/site";
 import type { Animal } from "@/types";
@@ -483,6 +484,7 @@ export function EditeurAnimal({
             <Texte id="slug" name="slug" defaultValue={fiche?.slug} placeholder="oslo" />
           </Champ>
         </div>
+        <ControlePublication statut={statut} />
       </CarteAdmin>
 
       {/* ---------------- Barre d'actions ---------------- */}

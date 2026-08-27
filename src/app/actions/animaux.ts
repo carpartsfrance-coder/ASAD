@@ -88,6 +88,12 @@ async function construireSaisie(
     if (lignes(data, "galerie").length === 0) {
       erreurs.galerie = "Ajoutez au moins une photo pour publier la fiche.";
     }
+    // Mention prévue par le code rural (art. L.214-8-1) pour toute offre de
+    // cession : une fiche publiée sans numéro n'est pas conforme.
+    if (!texte(data, "identification")) {
+      erreurs.identification =
+        "Le numéro d’identification est obligatoire pour publier la fiche.";
+    }
   }
 
   if (Object.keys(erreurs).length > 0) return { saisie: null, erreurs };
@@ -239,6 +245,25 @@ export async function changerStatut(data: FormData): Promise<void> {
   const slug = texte(data, "slug");
   const statut = choix(data, "statut", STATUTS, "brouillon");
   if (!id) return;
+
+  /**
+   * Publier depuis la liste ne doit pas contourner les contrôles du
+   * formulaire : une fiche incomplète reste en brouillon, et on renvoie la
+   * bénévole vers l'éditeur, où le panneau « Avant de publier » dit ce qui
+   * manque.
+   */
+  if (statut !== "brouillon" && slug) {
+    const fiche = await ficheParSlug(slug);
+    const incomplete =
+      !fiche ||
+      !fiche.descriptionCourte ||
+      fiche.galerie.length === 0 ||
+      !fiche.identification;
+
+    if (incomplete) {
+      redirect(`${routes.adminAnimaux}/${slug}`);
+    }
+  }
 
   await changerStatutAnimal(id, statut);
   await consigner(
