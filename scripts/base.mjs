@@ -68,6 +68,18 @@ if (action === "exporter") {
     );
     process.exit(1);
   }
+
+  // Erreur de collage courante : le texte d'exemple reste devant l'adresse.
+  if (!/^postgres(ql)?:\/\//.test(cible)) {
+    const debut = cible.slice(0, 40);
+    console.error(
+      `\n✗ Ceci n'est pas une adresse de base de données :\n  ${debut}…\n\n` +
+        "  Elle doit commencer par « postgresql:// ». Collez UNIQUEMENT\n" +
+        "  l'adresse, sans le texte d'exemple autour :\n\n" +
+        '  npm run db:importer -- "postgresql://…"\n',
+    );
+    process.exit(1);
+  }
   if (!existsSync(FICHIER)) {
     console.error(
       `\n✗ ${FICHIER} est introuvable. Lancez d'abord : npm run db:exporter\n`,
