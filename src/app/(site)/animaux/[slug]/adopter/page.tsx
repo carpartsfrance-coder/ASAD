@@ -10,6 +10,7 @@ import { association, routes } from "@/content/site";
 import { formatEuros } from "@/lib/format";
 import { libelleEspeceAccordee, libelleTaille, resumeSante } from "@/lib/animaux";
 import { animalParSlug } from "@/lib/donnees/animaux";
+import { formatCommune } from "@/lib/communes";
 
 export const dynamic = "force-dynamic";
 
@@ -105,7 +106,7 @@ export default async function PageAdopter({
               <ul className="mt-4 space-y-2.5 text-body text-mut">
                 <li className="flex items-center gap-2.5">
                   <MapPin size={16} strokeWidth={1.7} aria-hidden="true" className="shrink-0 text-acc" />
-                  {animal.commune}
+                  {formatCommune(animal.commune)}
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Ruler size={16} strokeWidth={1.7} aria-hidden="true" className="shrink-0 text-acc" />

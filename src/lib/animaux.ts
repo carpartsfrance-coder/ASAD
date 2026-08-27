@@ -96,9 +96,10 @@ export const libelleFiltreCompat: Record<FiltreCompat, string> = {
   enfants: "Avec des enfants",
 };
 
-export type TriCatalogue = "recents" | "anciens" | "nom";
+export type TriCatalogue = "urgents" | "recents" | "anciens" | "nom";
 
 export const libelleTri: Record<TriCatalogue, string> = {
+  urgents: "Urgents d’abord",
   recents: "Plus récents",
   anciens: "Plus anciens",
   nom: "Ordre alphabétique",
@@ -182,6 +183,18 @@ export function filtrerAnimaux(
 
 export function trierAnimaux(liste: Animal[], tri: TriCatalogue): Animal[] {
   const copie = [...liste];
+
+  /* Les urgences d'abord, puis les plus récentes à l'intérieur de chaque groupe. */
+  if (tri === "urgents") {
+    const rang = (a: Animal) =>
+      a.statut === "urgent" ? 0 : a.statut === "a_adopter" ? 1 : 2;
+    return copie.sort(
+      (a, b) =>
+        rang(a) - rang(b) ||
+        b.datePublication.localeCompare(a.datePublication),
+    );
+  }
+
   if (tri === "nom") {
     return copie.sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
   }

@@ -1,5 +1,6 @@
 import { MapPin, Mars, Ruler, Venus } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { formatCommune } from "@/lib/communes";
 import type { Animal } from "@/types";
 import { libelleSexe, libelleTaille } from "@/lib/animaux";
 
@@ -33,7 +34,7 @@ export function AnimalMeta({
       {avecCommune && (
         <li className="inline-flex items-center gap-[7px]">
           <MapPin size={16} strokeWidth={1.7} aria-hidden="true" className="shrink-0" />
-          {animal.commune}
+          {formatCommune(animal.commune)}
         </li>
       )}
     </ul>

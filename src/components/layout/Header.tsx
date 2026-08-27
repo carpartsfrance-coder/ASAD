@@ -46,7 +46,7 @@ export function Header({ lienDon }: { lienDon: string }) {
           decolle && "border-b border-line shadow-[0_2px_12px_rgba(20,32,24,.06)]",
         )}
       >
-      <Container as="header" className="flex items-center gap-6 py-4 lg:gap-11 lg:py-[18px]">
+      <Container as="header" className="flex items-center gap-6 py-4 lg:gap-6 lg:py-[18px] xl:gap-11">
         <SmartLink
           href={routes.accueil}
           className="shrink-0"
@@ -57,7 +57,7 @@ export function Header({ lienDon }: { lienDon: string }) {
 
         <nav
           aria-label="Navigation principale"
-          className="hidden items-center gap-[30px] text-nav font-medium lg:flex"
+          className="hidden items-center gap-[21px] text-nav font-medium lg:flex xl:gap-[30px]"
         >
           {navigationPrincipale.map((lien) => {
             const actif = estActif(lien.href);

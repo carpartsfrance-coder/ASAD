@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, PawPrint, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Heart,
+  PawPrint,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
+import { useFavoris } from "@/lib/favoris";
 import { AnimalCard } from "@/components/animaux/AnimalCard";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import {
+  CLES_FILTRES,
   FILTRES_VIDES,
   compterFiltresActifs,
   filtrerAnimaux,
@@ -85,7 +97,7 @@ const FILTRES: Array<{
       { valeur: "a_adopter", label: libelleStatut.a_adopter },
       { valeur: "urgent", label: libelleStatut.urgent },
       { valeur: "reserve", label: libelleStatut.reserve },
-      { valeur: "adopte", label: libelleStatut.adopte },
+      /* Pas d'« Adopté » ici : ces fiches ont leur page, /adoptes. */
     ],
   },
 ];
@@ -114,16 +126,87 @@ function fusionner(partiels?: Partial<FiltresAnimaux>): FiltresAnimaux {
 export function CatalogueAnimaux({
   animaux,
   filtresInitiaux,
+  pageInitiale = 1,
 }: {
   animaux: Animal[];
   filtresInitiaux?: Partial<FiltresAnimaux>;
+  /** Page lue dans l'URL, pour que le retour navigateur la retrouve. */
+  pageInitiale?: number;
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [filtres, setFiltres] = useState<FiltresAnimaux>(() => fusionner(filtresInitiaux));
-  const [page, setPage] = useState(1);
 
-  const resultats = useMemo(() => filtrerAnimaux(animaux, filtres), [animaux, filtres]);
+  const [filtres, setFiltres] = useState<FiltresAnimaux>(() => fusionner(filtresInitiaux));
+  const [page, setPage] = useState(Math.max(1, pageInitiale));
+  const [panneauOuvert, setPanneauOuvert] = useState(false);
+  const [coupsDeCoeurSeuls, setCoupsDeCoeurSeuls] = useState(false);
+
+  /** Ce que la bénévole tape, avant le délai de grâce. */
+  const [saisie, setSaisie] = useState(filtres.recherche);
+
+  const favoris = useFavoris();
+  const resultatsRef = useRef<HTMLDivElement>(null);
+  const premierRendu = useRef(true);
+
+  /* ------------------------------------------------------------------ */
+  /* L'URL est la mémoire de la page : filtres, tri et page y vivent.    */
+  /* ------------------------------------------------------------------ */
+
+  const construireUrl = useCallback(
+    (etat: FiltresAnimaux, numeroPage: number) => {
+      const params = new URLSearchParams();
+      (Object.keys(FILTRES_VIDES) as Array<keyof FiltresAnimaux>).forEach((cle) => {
+        if (etat[cle] !== FILTRES_VIDES[cle]) params.set(cle, String(etat[cle]));
+      });
+      if (numeroPage > 1) params.set("page", String(numeroPage));
+      const requete = params.toString();
+      return (requete ? `${pathname}?${requete}` : pathname) as Route;
+    },
+    [pathname],
+  );
+
+  /**
+   * Le retour du navigateur remet les paramètres d'URL dans les props : on
+   * réaligne l'état local dessus.
+   *
+   * Ajustement pendant le rendu plutôt que dans un effet — c'est le motif
+   * recommandé par React pour réagir à un changement de props, et il évite
+   * un rendu intermédiaire avec l'ancien état.
+   */
+  const cleUrl = `${JSON.stringify(filtresInitiaux ?? {})}|${pageInitiale}`;
+  const [cleSynchronisee, setCleSynchronisee] = useState(cleUrl);
+
+  if (cleUrl !== cleSynchronisee) {
+    const suivant = fusionner(filtresInitiaux);
+    setCleSynchronisee(cleUrl);
+    setFiltres(suivant);
+    setSaisie(suivant.recherche);
+    setPage(Math.max(1, pageInitiale));
+  }
+
+  /* Recherche dynamique : on attend 300 ms de silence avant d'appliquer. */
+  useEffect(() => {
+    if (saisie === filtres.recherche) return;
+    const minuteur = setTimeout(() => {
+      const suivant = { ...filtres, recherche: saisie };
+      setFiltres(suivant);
+      setPage(1);
+      router.replace(construireUrl(suivant, 1), { scroll: false });
+    }, 300);
+    return () => clearTimeout(minuteur);
+  }, [saisie, filtres, router, construireUrl]);
+
+  /* ------------------------------------------------------------------ */
+  /* Résultats                                                           */
+  /* ------------------------------------------------------------------ */
+
+  const resultats = useMemo(() => {
+    const filtres_ = filtrerAnimaux(animaux, filtres);
+    return coupsDeCoeurSeuls
+      ? filtres_.filter((a) => favoris.includes(a.slug))
+      : filtres_;
+  }, [animaux, filtres, coupsDeCoeurSeuls, favoris]);
+
   const actifs = useMemo(() => compterFiltresActifs(filtres), [filtres]);
 
   const disponibles = useMemo(
@@ -131,66 +214,95 @@ export function CatalogueAnimaux({
     [resultats],
   );
 
+  /** Coups de cœur encore proposables ici — les adoptés n'y figurent pas. */
+  const nbFavorisVisibles = useMemo(
+    () => animaux.filter((a) => favoris.includes(a.slug)).length,
+    [animaux, favoris],
+  );
+
   const nbPages = Math.max(1, Math.ceil(resultats.length / PAR_PAGE));
   const pageSure = Math.min(page, nbPages);
   const visibles = resultats.slice((pageSure - 1) * PAR_PAGE, pageSure * PAR_PAGE);
 
-  /* L'URL reflète les filtres : le lien reste partageable. */
+  /* Après un changement de page, on remonte au début des résultats. */
   useEffect(() => {
-    const params = new URLSearchParams();
-    (Object.keys(FILTRES_VIDES) as Array<keyof FiltresAnimaux>).forEach((cle) => {
-      if (filtres[cle] !== FILTRES_VIDES[cle]) params.set(cle, String(filtres[cle]));
-    });
-    const requete = params.toString();
-    router.replace(requete ? `${pathname}?${requete}` : pathname, { scroll: false });
-  }, [filtres, pathname, router]);
+    if (premierRendu.current) {
+      premierRendu.current = false;
+      return;
+    }
+    resultatsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [pageSure]);
+
+  /* ------------------------------------------------------------------ */
+  /* Actions                                                             */
+  /* ------------------------------------------------------------------ */
+
+  function appliquer(suivant: FiltresAnimaux, numeroPage = 1) {
+    setFiltres(suivant);
+    setSaisie(suivant.recherche);
+    setPage(numeroPage);
+    router.push(construireUrl(suivant, numeroPage), { scroll: false });
+  }
 
   function modifier(cle: keyof FiltresAnimaux, valeur: string) {
-    setFiltres((precedent) => ({ ...precedent, [cle]: valeur }));
-    setPage(1);
+    appliquer({ ...filtres, [cle]: valeur });
   }
 
   function reinitialiser() {
-    setFiltres({ ...FILTRES_VIDES });
-    setPage(1);
+    setCoupsDeCoeurSeuls(false);
+    appliquer({ ...FILTRES_VIDES });
   }
+
+  function allerPage(n: number) {
+    setPage(n);
+    router.push(construireUrl(filtres, n), { scroll: false });
+  }
+
+  /** Pastilles des filtres actifs, chacune supprimable. */
+  const pastilles = CLES_FILTRES.filter(
+    (cle) => filtres[cle] !== FILTRES_VIDES[cle],
+  ).map((cle) => {
+    const definition = FILTRES.find((f) => f.cle === cle);
+    const valeur = String(filtres[cle]);
+    const option = definition?.options.find((o) => o.valeur === valeur);
+    return {
+      cle,
+      libelle: definition
+        ? `${definition.label} : ${option?.label ?? valeur}`
+        : `Recherche : « ${valeur} »`,
+    };
+  });
 
   return (
     <div>
       {/* ---------------- Recherche et filtres ---------------- */}
       <section
         aria-label="Rechercher et filtrer les animaux"
-        className="rounded-panel bg-white p-5 shadow-stat sm:px-[26px] sm:pt-[22px] sm:pb-6"
+        className="rounded-panel bg-white p-4 shadow-stat sm:px-[26px] sm:pt-4 sm:pb-[18px]"
       >
-        <form
-          onSubmit={(e) => e.preventDefault()}
-          className="flex flex-col gap-3 sm:flex-row"
-        >
-          <div className="relative flex-1">
-            <label htmlFor="recherche-animal" className="sr-only">
-              Rechercher un animal
-            </label>
-            <Search
-              size={19}
-              strokeWidth={1.8}
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-[17px] -translate-y-1/2 text-mut"
-            />
-            <input
-              id="recherche-animal"
-              type="search"
-              value={filtres.recherche}
-              onChange={(e) => modifier("recherche", e.target.value)}
-              placeholder="Rechercher un nom, une race, une commune…"
-              className="h-[52px] w-full rounded-cta border-[1.4px] border-line bg-white pr-4 pl-[46px] text-nav text-ink transition-colors duration-150 placeholder:text-mut/70 focus:border-acc focus:outline-none"
-            />
-          </div>
-          <Button type="submit" variante="primaire" taille="md" className="h-[52px] shrink-0">
-            Rechercher
-          </Button>
-        </form>
+        {/* La recherche s'applique d'elle-même : plus de bouton à chercher. */}
+        <div className="relative">
+          <label htmlFor="recherche-animal" className="sr-only">
+            Rechercher un animal
+          </label>
+          <Search
+            size={19}
+            strokeWidth={1.8}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-[17px] -translate-y-1/2 text-mut"
+          />
+          <input
+            id="recherche-animal"
+            type="search"
+            value={saisie}
+            onChange={(e) => setSaisie(e.target.value)}
+            placeholder="Rechercher un nom, une race, une commune…"
+            className="h-[52px] w-full rounded-cta border-[1.4px] border-line bg-white pr-4 pl-[46px] text-nav text-ink transition-colors duration-150 placeholder:text-mut/70 focus:border-acc focus:outline-none"
+          />
+        </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        {/* Écran large : les six menus en clair. */}
+        <div className="mt-3 hidden flex-wrap items-center gap-2.5 md:flex">
           {FILTRES.map((filtre) => {
             const valeur = String(filtres[filtre.cle]);
             const actif = valeur !== String(FILTRES_VIDES[filtre.cle]);
@@ -228,28 +340,112 @@ export function CatalogueAnimaux({
             );
           })}
 
-          {actifs > 0 && (
-            <button
-              type="button"
-              onClick={reinitialiser}
-              className="link-underline inline-flex items-center gap-2 text-body font-semibold text-acc transition-colors duration-150 hover:text-acc-dark"
-            >
-              Réinitialiser
-            </button>
-          )}
+        </div>
+
+        {/* Mobile : un seul bouton, qui dit combien de filtres sont posés. */}
+        <div className="mt-4 md:hidden">
+          <button
+            type="button"
+            onClick={() => setPanneauOuvert(true)}
+            aria-haspopup="dialog"
+            aria-expanded={panneauOuvert}
+            className={cn(
+              "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-btn border-[1.4px] text-body font-semibold transition-colors duration-150",
+              actifs > 0
+                ? "border-acc bg-acc-soft text-pri"
+                : "border-line bg-white text-pri hover:border-pri",
+            )}
+          >
+            <SlidersHorizontal size={17} strokeWidth={1.9} aria-hidden="true" />
+            Filtres ({actifs})
+          </button>
         </div>
       </section>
 
-      {/* ---------------- Compteur et tri ---------------- */}
-      <div className="mt-[26px] flex flex-wrap items-center justify-between gap-4">
-        <p className="text-nav text-mut" role="status" aria-live="polite">
-          <strong className="font-bold text-ink">
-            {resultats.length} résultat{resultats.length > 1 ? "s" : ""}
-          </strong>
-          {disponibles > 0 && (
-            <> — dont {disponibles} animal{disponibles > 1 ? "aux" : ""} à adopter dès maintenant</>
+      {/* ---------------- Filtres posés, retirables un à un ---------------- */}
+      {(pastilles.length > 0 || coupsDeCoeurSeuls) && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="sr-only">Filtres actifs :</span>
+
+          {coupsDeCoeurSeuls && (
+            <button
+              type="button"
+              onClick={() => setCoupsDeCoeurSeuls(false)}
+              className="inline-flex items-center gap-2 rounded-full border-[1.4px] border-acc bg-acc-soft px-3.5 py-1.5 text-mini font-semibold text-pri transition-colors duration-150 hover:bg-white"
+            >
+              Mes coups de cœur
+              <X size={13} strokeWidth={2.4} aria-hidden="true" />
+              <span className="sr-only">— retirer ce filtre</span>
+            </button>
           )}
-        </p>
+
+          {pastilles.map((pastille) => (
+            <button
+              key={pastille.cle}
+              type="button"
+              onClick={() => modifier(pastille.cle, String(FILTRES_VIDES[pastille.cle]))}
+              className="inline-flex items-center gap-2 rounded-full border-[1.4px] border-acc bg-acc-soft px-3.5 py-1.5 text-mini font-semibold text-pri transition-colors duration-150 hover:bg-white"
+            >
+              {pastille.libelle}
+              <X size={13} strokeWidth={2.4} aria-hidden="true" />
+              <span className="sr-only">— retirer ce filtre</span>
+            </button>
+          ))}
+
+          <button
+            type="button"
+            onClick={reinitialiser}
+            className="link-underline ml-1 text-mini font-semibold text-acc transition-colors duration-150 hover:text-acc-dark"
+          >
+            Réinitialiser les filtres
+          </button>
+        </div>
+      )}
+
+      {/* ---------------- Compteur, coups de cœur et tri ---------------- */}
+      <div
+        ref={resultatsRef}
+        id="resultats"
+        className="mt-4 flex scroll-mt-28 flex-wrap items-center justify-between gap-3"
+      >
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="text-nav text-mut" role="status" aria-live="polite">
+            <strong className="font-bold text-ink">
+              {resultats.length} résultat{resultats.length > 1 ? "s" : ""}
+            </strong>
+            {disponibles > 0 && (
+              <>
+                {" "}
+                — dont {disponibles}{" "}
+                {disponibles > 1 ? "animaux" : "animal"} à adopter dès maintenant
+              </>
+            )}
+          </p>
+
+          {/* Retrouver ce qu'on a mis de côté, sans quitter la page. */}
+          <button
+            type="button"
+            onClick={() => {
+              setCoupsDeCoeurSeuls((v) => !v);
+              setPage(1);
+            }}
+            aria-pressed={coupsDeCoeurSeuls}
+            className={cn(
+              "inline-flex h-9 items-center gap-2 rounded-full border-[1.4px] px-3.5 text-mini font-semibold transition-colors duration-150",
+              coupsDeCoeurSeuls
+                ? "border-acc bg-acc-soft text-pri"
+                : "border-line bg-white text-mut hover:border-pri hover:text-pri",
+            )}
+          >
+            <Heart
+              size={14}
+              strokeWidth={2}
+              aria-hidden="true"
+              className={coupsDeCoeurSeuls ? "fill-acc text-acc" : undefined}
+            />
+            Mes coups de cœur ({nbFavorisVisibles})
+          </button>
+        </div>
 
         <div className="relative">
           <label htmlFor="tri-animaux" className="sr-only">
@@ -274,7 +470,7 @@ export function CatalogueAnimaux({
       {/* ---------------- Résultats ---------------- */}
       {visibles.length > 0 ? (
         <>
-          <ul className="mt-[30px] grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-[26px]">
+          <ul className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-[26px]">
             {visibles.map((animal, index) => (
               <li key={animal.id} className="flex">
                 <AnimalCard animal={animal} priorite={index < 3} className="w-full" />
@@ -286,25 +482,35 @@ export function CatalogueAnimaux({
             <nav aria-label="Pagination" className="mt-11 flex justify-center">
               <ul className="flex items-center gap-2">
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={pageSure === 1}
-                    className="flex size-[42px] items-center justify-center rounded-btn border border-line bg-white text-pri transition-colors duration-150 hover:border-pri disabled:opacity-40 disabled:hover:border-line"
-                  >
-                    <ArrowLeft size={17} strokeWidth={1.9} aria-hidden="true" />
-                    <span className="sr-only">Page précédente</span>
-                  </button>
+                  {pageSure === 1 ? (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-[42px] items-center justify-center rounded-btn border border-line bg-white text-pri opacity-40"
+                    >
+                      <ArrowLeft size={17} strokeWidth={1.9} />
+                    </span>
+                  ) : (
+                    <Link
+                      href={construireUrl(filtres, pageSure - 1)}
+                      scroll={false}
+                      onClick={() => allerPage(pageSure - 1)}
+                      className="flex size-[42px] items-center justify-center rounded-btn border border-line bg-white text-pri transition-colors duration-150 hover:border-pri"
+                    >
+                      <ArrowLeft size={17} strokeWidth={1.9} aria-hidden="true" />
+                      <span className="sr-only">Page précédente</span>
+                    </Link>
+                  )}
                 </li>
 
                 {Array.from({ length: nbPages }, (_, i) => i + 1).map((n) => (
                   <li key={n}>
-                    <button
-                      type="button"
-                      onClick={() => setPage(n)}
+                    <Link
+                      href={construireUrl(filtres, n)}
+                      scroll={false}
+                      onClick={() => allerPage(n)}
                       aria-current={n === pageSure ? "page" : undefined}
                       className={cn(
-                        "size-[42px] rounded-btn text-body font-semibold transition-colors duration-150",
+                        "flex size-[42px] items-center justify-center rounded-btn text-body font-semibold transition-colors duration-150",
                         n === pageSure
                           ? "bg-pri text-white"
                           : "border border-line bg-white text-pri hover:border-pri",
@@ -312,20 +518,29 @@ export function CatalogueAnimaux({
                     >
                       {n}
                       <span className="sr-only"> — page {n}</span>
-                    </button>
+                    </Link>
                   </li>
                 ))}
 
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.min(nbPages, p + 1))}
-                    disabled={pageSure === nbPages}
-                    className="flex size-[42px] items-center justify-center rounded-btn border border-line bg-white text-pri transition-colors duration-150 hover:border-pri disabled:opacity-40 disabled:hover:border-line"
-                  >
-                    <ArrowRight size={17} strokeWidth={1.9} aria-hidden="true" />
-                    <span className="sr-only">Page suivante</span>
-                  </button>
+                  {pageSure === nbPages ? (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-[42px] items-center justify-center rounded-btn border border-line bg-white text-pri opacity-40"
+                    >
+                      <ArrowRight size={17} strokeWidth={1.9} />
+                    </span>
+                  ) : (
+                    <Link
+                      href={construireUrl(filtres, pageSure + 1)}
+                      scroll={false}
+                      onClick={() => allerPage(pageSure + 1)}
+                      className="flex size-[42px] items-center justify-center rounded-btn border border-line bg-white text-pri transition-colors duration-150 hover:border-pri"
+                    >
+                      <ArrowRight size={17} strokeWidth={1.9} aria-hidden="true" />
+                      <span className="sr-only">Page suivante</span>
+                    </Link>
+                  )}
                 </li>
               </ul>
             </nav>
@@ -338,20 +553,115 @@ export function CatalogueAnimaux({
             <PawPrint size={44} strokeWidth={0} aria-hidden="true" className="fill-pri opacity-70" />
           </span>
           <h2 className="mt-6 text-title font-extrabold text-ink">
-            Aucun animal ne correspond à ces critères
+            {coupsDeCoeurSeuls && nbFavorisVisibles === 0
+              ? "Vous n’avez pas encore de coup de cœur"
+              : "Aucun animal ne correspond à ces critères"}
           </h2>
           <p className="mx-auto mt-3 max-w-[470px] text-nav leading-[1.7] text-mut">
-            Nos protégés changent régulièrement et de nouvelles fiches sont publiées
-            chaque semaine. Élargissez votre recherche, ou dites-nous ce que vous
-            cherchez : nous vous préviendrons.
+            {coupsDeCoeurSeuls && nbFavorisVisibles === 0 ? (
+              <>
+                Touchez le cœur en haut d’une photo pour mettre un animal de côté.
+                Vous le retrouverez ici, même après avoir fermé la page.
+              </>
+            ) : (
+              <>
+                Nos protégés changent régulièrement et de nouvelles fiches sont
+                publiées chaque semaine. Élargissez votre recherche, ou dites-nous
+                ce que vous cherchez : nous vous préviendrons.
+              </>
+            )}
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button type="button" onClick={reinitialiser} variante="primaire" taille="md">
-              Réinitialiser les filtres
+              {coupsDeCoeurSeuls ? "Voir tous les animaux" : "Réinitialiser les filtres"}
             </Button>
             <Button href={routes.contact} variante="contourAccent" taille="md">
               Être alerté par e-mail
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- Panneau des filtres, sur mobile ---------------- */}
+      {panneauOuvert && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Fermer les filtres"
+            tabIndex={-1}
+            onClick={() => setPanneauOuvert(false)}
+            className="absolute inset-0 h-full w-full cursor-default bg-pri/45"
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Filtrer les animaux"
+            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-panel bg-white p-5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-card font-bold text-ink">Filtres</h2>
+              <button
+                type="button"
+                onClick={() => setPanneauOuvert(false)}
+                className="flex size-11 items-center justify-center rounded-full text-pri transition-colors duration-150 hover:bg-acc-soft"
+              >
+                <X size={22} strokeWidth={1.9} aria-hidden="true" />
+                <span className="sr-only">Fermer les filtres</span>
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {FILTRES.map((filtre) => (
+                <div key={filtre.cle}>
+                  <label
+                    htmlFor={`panneau-${filtre.cle}`}
+                    className="block text-meta font-semibold text-ink"
+                  >
+                    {filtre.label}
+                  </label>
+                  <select
+                    id={`panneau-${filtre.cle}`}
+                    value={String(filtres[filtre.cle])}
+                    onChange={(e) => modifier(filtre.cle, e.target.value)}
+                    style={FLECHE}
+                    className="mt-1.5 h-12 w-full cursor-pointer appearance-none rounded-btn border-[1.4px] border-line bg-white pr-9 pl-3.5 text-body text-ink transition-colors duration-150 focus:border-acc focus:outline-none"
+                  >
+                    {filtre.options.map((o) => (
+                      <option key={o.valeur} value={o.valeur}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <Button
+                type="button"
+                onClick={() => setPanneauOuvert(false)}
+                variante="primaire"
+                taille="md"
+                pleineLargeur
+              >
+                Voir les {resultats.length} résultat{resultats.length > 1 ? "s" : ""}
+              </Button>
+              {actifs > 0 && (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    reinitialiser();
+                    setPanneauOuvert(false);
+                  }}
+                  variante="contour"
+                  taille="md"
+                  pleineLargeur
+                >
+                  Réinitialiser les filtres
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}

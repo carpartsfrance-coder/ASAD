@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useSyncExternalStore } from "react";
+
 /**
  * Petit magasin des « coups de cœur », persisté dans le navigateur.
  *
@@ -63,4 +67,17 @@ export function basculerFavori(slug: string): void {
     // Le basculement reste effectif pour la session en cours.
   }
   prevenir();
+}
+
+/**
+ * Liste des coups de cœur, synchronisée entre tous les composants montés.
+ * Rendue vide côté serveur : le stockage local n'existe que dans le navigateur.
+ */
+export function useFavoris(): string[] {
+  const brut = useSyncExternalStore(
+    sAbonnerAuxFavoris,
+    instantaneFavoris,
+    instantaneFavorisServeur,
+  );
+  return useMemo(() => analyserFavoris(brut), [brut]);
 }

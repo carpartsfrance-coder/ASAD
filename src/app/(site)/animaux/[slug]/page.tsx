@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { routes, siteUrl } from "@/content/site";
 import { libelleEspeceAccordee, libelleRace, libelleSexe } from "@/lib/animaux";
 import { animalParSlug, animauxSimilaires } from "@/lib/donnees/animaux";
+import { formatCommune } from "@/lib/communes";
 
 /* Le contenu vient de la base : la page se rend à chaque visite,
    pour que les modifications du back-office soient visibles aussitôt. */
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const description =
     animal.statut === "adopte"
       ? `${animal.nom} a trouvé sa famille. Découvrez son histoire et les animaux qui attendent encore la leur.`
-      : `${animal.descriptionCourte} ${animal.nom} est à l’adoption chez ASAD, ${animal.commune}.`;
+      : `${animal.descriptionCourte} ${animal.nom} est à l’adoption chez ASAD, ${formatCommune(animal.commune)}.`;
 
   return {
     title: titre,

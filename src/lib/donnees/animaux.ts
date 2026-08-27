@@ -130,6 +130,23 @@ export async function animauxPublies(): Promise<Animal[]> {
   return assembler(lignes);
 }
 
+/**
+ * Animaux du catalogue public `/animaux`.
+ *
+ * Les fiches adoptées en sont exclues : elles ont leur propre page `/adoptes`,
+ * où elles sont racontées. Les garder ici diluait les animaux qui attendent
+ * vraiment une famille.
+ */
+export async function animauxCatalogue(): Promise<Animal[]> {
+  const lignes = await db
+    .select()
+    .from(tAnimaux)
+    .where(sql`${tAnimaux.statut} in ('a_adopter','urgent','reserve')`)
+    .orderBy(desc(tAnimaux.datePublication));
+
+  return assembler(lignes);
+}
+
 /** Animaux que l'on peut adopter dès maintenant. */
 export async function animauxDisponibles(): Promise<Animal[]> {
   const lignes = await db

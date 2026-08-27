@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { CatalogueAnimaux } from "@/components/animaux/CatalogueAnimaux";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
@@ -7,7 +8,7 @@ import { Container } from "@/components/ui/Container";
 import { pageCatalogue } from "@/content/pages";
 import { routes } from "@/content/site";
 import { type FiltresAnimaux } from "@/lib/animaux";
-import { animauxPublies } from "@/lib/donnees/animaux";
+import { animauxCatalogue } from "@/lib/donnees/animaux";
 
 export const metadata: Metadata = {
   title: "Nos animaux à adopter",
@@ -40,51 +41,93 @@ export default async function PageAnimaux({
     tri: lire("tri") as FiltresAnimaux["tri"],
   };
 
+  const pageInitiale = Math.max(1, Number(lire("page") ?? 1) || 1);
+
   return (
     <>
-      <Container className="pt-8">
+      <Container className="pt-3">
         <Breadcrumb maillons={[{ label: "Nos animaux" }]} />
       </Container>
 
-      {/* Héro compact */}
-      <Container as="section" className="grid gap-8 pt-[30px] lg:grid-cols-[1fr_0.82fr] lg:gap-12">
-        <div>
-          <p className="mb-4 text-tiny font-bold tracking-[0.2em] text-pri uppercase">
-            {pageCatalogue.surtitre}
-          </p>
-          <h1 className="max-w-[520px] text-[32px] leading-[1.14] font-extrabold tracking-[-0.022em] text-ink sm:text-[40px] lg:text-[46px]">
-            {pageCatalogue.titre}
-          </h1>
-          <p className="mt-5 max-w-[560px] text-[16.5px] leading-[1.74] text-mut">
-            {pageCatalogue.chapo}
-          </p>
-        </div>
+      {/*
+        Héro resserré : à 1366 × 900, les premières photos doivent être
+        visibles sans faire défiler. Le texte reste, les marges maigrissent.
+      */}
+      <Container as="section" className="pt-3">
+        <p className="mb-2.5 text-tiny font-bold tracking-[0.2em] text-pri uppercase">
+          {pageCatalogue.surtitre}
+        </p>
+        <h1 className="max-w-[620px] text-[28px] leading-[1.14] font-extrabold tracking-[-0.022em] text-ink sm:text-[34px] lg:text-[38px]">
+          {pageCatalogue.titre}
+        </h1>
+        <p className="mt-2.5 max-w-[68ch] text-nav leading-[1.6] text-mut">
+          {pageCatalogue.chapo}
+        </p>
+      </Container>
 
-        {/* Encart « Comment se passe une adoption ? » */}
-        <aside className="rounded-panel bg-white px-6 pt-[26px] pb-6 shadow-card sm:px-7">
-          <h2 className="text-card font-bold text-ink">{pageCatalogue.encart.titre}</h2>
-          <ol className="mt-4 space-y-4">
+      {/*
+        « Comment adopter ? » — bandeau plat sur ordinateur, deux colonnes sur
+        tablette, bloc repliable sur mobile pour ne pas repousser les cartes.
+      */}
+      <Container className="pt-4">
+        {/* Mobile : replié par défaut, ouverture native et accessible. */}
+        <details className="group rounded-panel bg-white shadow-card md:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-body font-bold text-ink [&::-webkit-details-marker]:hidden">
+            Comment adopter ?
+            <ChevronDown
+              size={19}
+              strokeWidth={2}
+              aria-hidden="true"
+              className="shrink-0 text-acc transition-transform duration-200 group-open:rotate-180"
+            />
+          </summary>
+          <ol className="space-y-3.5 px-5 pb-5">
             {pageCatalogue.encart.etapes.map((etape, index) => (
-              <li key={etape.titre} className="flex gap-3.5">
+              <li key={etape.titre} className="flex gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-soft text-mini font-extrabold text-pri"
+                  className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-soft text-mini font-extrabold text-pri"
                 >
                   {index + 1}
                 </span>
                 <div>
                   <p className="text-body font-semibold text-ink">{etape.titre}</p>
-                  <p className="mt-0.5 text-body leading-[1.6] text-mut">{etape.texte}</p>
+                  <p className="mt-0.5 text-mini leading-[1.55] text-mut">{etape.texte}</p>
                 </div>
               </li>
             ))}
           </ol>
-        </aside>
+        </details>
+
+        {/* Tablette et ordinateur : un bandeau, deux puis quatre colonnes. */}
+        <section
+          aria-label={pageCatalogue.encart.titre}
+          className="hidden rounded-panel bg-white px-5 py-3.5 shadow-card md:block"
+        >
+          <ol className="grid gap-x-6 gap-y-3.5 md:grid-cols-2 lg:grid-cols-4">
+            {pageCatalogue.encart.etapes.map((etape, index) => (
+              <li key={etape.titre} className="flex gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-soft text-mini font-extrabold text-pri"
+                >
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-mini font-bold text-ink">{etape.titre}</p>
+                  <p className="mt-0.5 text-mini leading-[1.5] text-mut lg:hidden">{etape.texte}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
       </Container>
 
       {/* Recherche, filtres et grille */}
-      <Container className="pt-10">
-        <CatalogueAnimaux animaux={await animauxPublies()} filtresInitiaux={filtresInitiaux} />
+      <Container className="pt-4">
+        <CatalogueAnimaux animaux={await animauxCatalogue()} filtresInitiaux={filtresInitiaux}
+          pageInitiale={pageInitiale}
+        />
       </Container>
 
       {/* Encadré final */}

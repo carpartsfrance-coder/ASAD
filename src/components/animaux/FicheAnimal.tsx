@@ -30,6 +30,7 @@ import { association, helloAsso, routes } from "@/content/site";
 import { cn } from "@/lib/cn";
 import type { Animal, Compat } from "@/types";
 import { GalerieAnimal } from "./GalerieAnimal";
+import { formatCommune } from "@/lib/communes";
 
 /* ------------------------------------------------------------------ */
 /* Briques internes                                                    */
@@ -173,7 +174,7 @@ export function ColonneAnimal({ animal }: { animal: Animal }) {
         <span className="inline-flex items-center gap-2">
           <MapPin size={17} strokeWidth={1.7} aria-hidden="true" />
           {animal.familleAccueil ? "Famille d’accueil à " : ""}
-          {animal.commune}
+          {formatCommune(animal.commune)}
         </span>
       </p>
 
@@ -389,7 +390,7 @@ export function EncadreAnimal({ animal }: { animal: Animal }) {
 
         <dl className="mt-5">
           <LigneEncadre libelle="Statut" valeur={libelleStatut[animal.statut]} />
-          <LigneEncadre libelle="Localisation" valeur={animal.commune} />
+          <LigneEncadre libelle="Localisation" valeur={formatCommune(animal.commune)} />
           <LigneEncadre libelle="Réponse sous" valeur="5 jours ouvrés" />
         </dl>
 
