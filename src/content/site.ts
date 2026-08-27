@@ -14,24 +14,24 @@
 export const association = {
   nom: "ASAD",
   /** ASAD est un sigle : c'est ce qu'il veut dire. */
-  nomComplet: "ASAD — Association des Animaux en Détresse",
+  nomComplet: "ASAD — Association Sauvetage Animaux en Détresse",
   /** Le nom déployé seul, tel qu'il figure sous le logo. */
-  signification: "Association des Animaux en Détresse",
-  baseline: "Association de protection animale 100 % bénévole — Hérault et Gard",
+  signification: "Association Sauvetage Animaux en Détresse",
+  baseline: "Association de protection animale 100 % bénévole — Bouches-du-Rhône",
   description:
-    "Association de protection animale 100 % bénévole, nous agissons chaque jour pour offrir protection, soins et amour aux animaux abandonnés.",
+    "Association de protection animale 100 % bénévole. Nous recueillons les animaux abandonnés, les confions à des familles d’accueil et leur trouvons une famille pour la vie.",
   email: "Asad13@wanadoo.fr",
   telephone: "06 63 39 05 29",
   /** Format international, pour les liens `tel:`. */
   telephoneLien: "+33663390529",
   adresse: {
-    voie: "1 rue des Tilleuls",
-    codePostal: "34400",
-    ville: "Lunel",
+    voie: "10 Plage du Jai",
+    codePostal: "13220",
+    ville: "Châteauneuf-les-Martigues",
     pays: "France",
   },
   /** Départements d'intervention. */
-  territoire: "Hérault et Gard",
+  territoire: "Bouches-du-Rhône",
   /** Numéro RNA (registre national des associations) — à compléter. */
   rna: "W000000000",
   /** Association loi 1901. */
