@@ -263,3 +263,25 @@ li {
 .zone-admin {
   --color-mut: #4a4a4a;
 }
+
+/*
+ * Projecteur sur le champ en cours.
+ *
+ * Dès qu'un champ prend le focus, les autres s'atténuent : on voit d'un coup
+ * d'œil où l'on en est. On atténue plutôt qu'on ne floute — du texte flouté
+ * reste du bruit visuel, et il devient illisible pour qui a une vue fatiguée,
+ * alors qu'un texte atténué se relit simplement en le regardant.
+ */
+.zone-admin .projecteur:focus-within .bloc-focus {
+  opacity: 0.4;
+  transition: opacity 180ms ease;
+}
+
+.zone-admin .projecteur:focus-within .bloc-focus:focus-within {
+  opacity: 1;
+}
+
+/* À la souris comme au clavier, survoler un bloc atténué le rend lisible. */
+.zone-admin .projecteur:focus-within .bloc-focus:hover {
+  opacity: 0.85;
+}

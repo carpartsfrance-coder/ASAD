@@ -47,6 +47,7 @@ function Champ({
   return (
     <div
       className={cn(
+        "bloc-focus",
         manquant &&
           "-ml-3 rounded-r-media border-l-[3px] border-l-acc bg-erreur-fond py-2.5 pr-3 pl-3",
         className,
@@ -360,7 +361,7 @@ export function EditeurAnimal({
         </div>
       )}
 
-      <CarteAdmin className="mt-4 p-5 sm:p-6">
+      <CarteAdmin className="projecteur mt-4 p-5 sm:p-6">
         {/* ---------------- L'essentiel ---------------- */}
         <div className={panneau("essentiel")}>
           <p className="text-meta leading-[1.6] text-mut">
@@ -417,11 +418,13 @@ export function EditeurAnimal({
             {assistantDisponible && <BoutonReformuler champ="descriptionCourte" />}
           </Champ>
 
+          <div className="bloc-focus">
           <TeleverseurPhotos
             photosInitiales={fiche?.galerie}
             legende="Glissez les photos de l’animal ici"
             erreur={erreurs.galerie}
           />
+          </div>
 
           <Champ
             id="statut"
