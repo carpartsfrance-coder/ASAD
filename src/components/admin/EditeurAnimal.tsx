@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, CircleAlert, Eye, Save } from "lucide-react";
 import { enregistrerFiche, supprimerFiche } from "@/app/actions/animaux";
 import { BoutonSuppression } from "./BoutonSuppression";
@@ -27,6 +27,7 @@ function Champ({
   label,
   aide,
   erreur,
+  manquant,
   children,
   className,
 }: {
@@ -34,13 +35,33 @@ function Champ({
   label: string;
   aide?: string;
   erreur?: string;
+  /**
+   * Champ nécessaire, encore vide. Signalé visuellement pour qu'on le repère
+   * sans avoir à lire toute la page — « À remplir », pas « erreur » : rien
+   * n'est encore raté, il reste à faire.
+   */
+  manquant?: boolean;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <div className={className}>
-      <label htmlFor={id} className="block text-meta font-semibold text-ink">
+    <div
+      className={cn(
+        manquant &&
+          "-ml-3 rounded-r-media border-l-[3px] border-l-acc bg-erreur-fond py-2.5 pr-3 pl-3",
+        className,
+      )}
+    >
+      <label
+        htmlFor={id}
+        className="flex flex-wrap items-center gap-2 text-meta font-semibold text-ink"
+      >
         {label}
+        {manquant && (
+          <span className="rounded-full bg-acc px-2 py-0.5 text-[10.5px] font-bold tracking-[0.04em] uppercase text-white">
+            À remplir
+          </span>
+        )}
       </label>
       {aide && <p className="mt-1 text-tiny leading-[1.5] text-mut">{aide}</p>}
       <div className="mt-2">{children}</div>
@@ -193,6 +214,42 @@ export function EditeurAnimal({
   const panneau = (cle: Vue) =>
     cn("space-y-5", onglet === cle ? "block" : "hidden");
 
+  /**
+   * Champs nécessaires encore vides, relus à chaque frappe.
+   * `nom`, `age` et `commune` sont exigés dès l'enregistrement ; la
+   * description et la photo le sont pour publier.
+   */
+  const [manquants, setManquants] = useState<string[]>([]);
+
+  useEffect(() => {
+    const form = document.getElementById("parcours-fiche")?.closest("form");
+    if (!form) return;
+
+    const relire = () => {
+      const vide = (nom: string) => {
+        const el = form.elements.namedItem(nom);
+        return el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement ||
+          el instanceof HTMLSelectElement
+          ? el.value.trim() === ""
+          : false;
+      };
+      setManquants(
+        ["nom", "age", "commune", "descriptionCourte"].filter(vide),
+      );
+    };
+
+    relire();
+    form.addEventListener("input", relire);
+    form.addEventListener("change", relire);
+    return () => {
+      form.removeEventListener("input", relire);
+      form.removeEventListener("change", relire);
+    };
+  }, []);
+
+  const aRemplir = (nom: string) => manquants.includes(nom);
+
   const surEssentiel = onglet === "essentiel";
   const indexEtape = ONGLETS.findIndex((o) => o.cle === onglet);
   const etape = ONGLETS[indexEtape];
@@ -312,7 +369,7 @@ export function EditeurAnimal({
           </p>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <Champ id="nom" label="Nom de l’animal" erreur={erreurs.nom}>
+            <Champ id="nom" label="Nom de l’animal" erreur={erreurs.nom} manquant={aRemplir("nom")}>
               <Texte id="nom" name="nom" defaultValue={fiche?.nom} required />
             </Champ>
             <Champ id="espece" label="Espèce">
@@ -341,16 +398,17 @@ export function EditeurAnimal({
                 ]}
               />
             </Champ>
-            <Champ id="age" label="Âge affiché" aide="Tel qu’il apparaîtra sur le site : « 3 ans », « 6 mois »." erreur={erreurs.age}>
+            <Champ id="age" label="Âge affiché" aide="Tel qu’il apparaîtra sur le site : « 3 ans », « 6 mois »." erreur={erreurs.age} manquant={aRemplir("age")}>
               <Texte id="age" name="age" defaultValue={fiche?.age} required />
             </Champ>
-            <Champ id="commune" label="Où se trouve l’animal" aide="Commune et département : « Lunel (34) »." erreur={erreurs.commune}>
+            <Champ id="commune" label="Où se trouve l’animal" aide="Commune et département : « Lunel (34) »." erreur={erreurs.commune} manquant={aRemplir("commune")}>
               <Texte id="commune" name="commune" defaultValue={fiche?.commune} required />
             </Champ>
           </div>
 
           <Champ
             id="descriptionCourte"
+            manquant={aRemplir("descriptionCourte")}
             label="Description"
             aide="Qui il est, d’où il vient, son caractère. Quelques phrases suffisent — écrivez comme vous parlez, l’assistant met au propre."
             erreur={erreurs.descriptionCourte}
