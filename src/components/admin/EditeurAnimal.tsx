@@ -149,15 +149,15 @@ const ONGLETS = [
   },
   {
     cle: "compatibilites",
-    label: "Compatibilités",
-    titre: "Avec qui peut-il vivre ?",
-    phrase: "Ce qu'il supporte : les autres chiens, les chats, les enfants.",
+    label: "Précisions",
+    titre: "Nuancer les compatibilités",
+    phrase: "Les réponses sont déjà données ; ici on peut ajouter une nuance à chacune.",
   },
   {
     cle: "sante",
     label: "Santé",
-    titre: "Où en est sa santé ?",
-    phrase: "Vacciné, identifié, stérilisé, et les soins en cours s'il y en a.",
+    titre: "Détail de sa santé",
+    phrase: "Son état général et les soins en cours, s'il y en a.",
   },
   {
     cle: "adoption",
@@ -464,6 +464,64 @@ export function EditeurAnimal({
             {assistantDisponible && <BoutonReformuler champ="descriptionCourte" />}
           </Champ>
 
+
+          {/*
+            Ces six réponses conditionnent la publication : elles doivent donc
+            se donner ici, pas derrière « Compléter la fiche ». Présentées en
+            deux rangées compactes pour ne pas rallonger l'écran.
+          */}
+          <fieldset>
+            <legend className="text-meta font-bold text-ink">
+              Avec qui peut-il vivre ?
+            </legend>
+            <p className="mt-1 text-mini leading-[1.5] text-mut">
+              Choisissez « À tester » si vous ne savez pas : c’est plus honnête
+              et cela évite les mauvaises surprises.
+            </p>
+            <div className="mt-3 grid gap-5 sm:grid-cols-3">
+              {(
+                [
+                  ["compatChiens", "Les chiens", fiche?.compatChiens],
+                  ["compatChats", "Les chats", fiche?.compatChats],
+                  ["compatEnfants", "Les enfants", fiche?.compatEnfants],
+                ] as const
+              ).map(([champ, label, valeur]) => (
+                <Champ key={champ} id={champ} label={label} manquant={aRemplir(champ)}>
+                  <Liste
+                    id={champ}
+                    name={champ}
+                    defaultValue={fiche ? (valeur ?? "a_tester") : ""}
+                    options={OPTIONS_COMPAT}
+                  />
+                </Champ>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-meta font-bold text-ink">
+              Où en est sa santé ?
+            </legend>
+            <div className="mt-3 grid gap-5 sm:grid-cols-3">
+              {(
+                [
+                  ["identifie", "Identifié", fiche?.sante.identifie],
+                  ["vaccine", "Vacciné", fiche?.sante.vaccine],
+                  ["sterilise", "Stérilisé", fiche?.sante.sterilise],
+                ] as const
+              ).map(([cle, label, valeur]) => (
+                <Champ key={cle} id={cle} label={label} manquant={aRemplir(cle)}>
+                  <Liste
+                    id={cle}
+                    name={cle}
+                    defaultValue={fiche ? (valeur ? "oui" : "non") : ""}
+                    options={OPTIONS_OUI_NON}
+                  />
+                </Champ>
+              ))}
+            </div>
+          </fieldset>
+
           <div className="bloc-focus">
           <TeleverseurPhotos
             photosInitiales={fiche?.galerie}
@@ -534,58 +592,33 @@ export function EditeurAnimal({
         {/* ---------------- Compatibilités ---------------- */}
         <div className={panneau("compatibilites")}>
           <p className="text-meta leading-[1.6] text-mut">
-            Ce que l’animal supporte. Choisissez « À tester » si vous ne savez pas :
-            c’est plus honnête, et cela évite les mauvaises surprises.
+            Les réponses se donnent sur l’écran d’accueil. Ici, vous pouvez
+            ajouter une précision à côté de chacune — c’est facultatif.
           </p>
           {(
             [
-              ["chiens", "Avec les chiens", fiche?.compatChiens, fiche?.compatNotes?.chiens],
-              ["chats", "Avec les chats", fiche?.compatChats, fiche?.compatNotes?.chats],
-              ["enfants", "Avec les enfants", fiche?.compatEnfants, fiche?.compatNotes?.enfants],
+              ["chiens", "Avec les chiens", fiche?.compatNotes?.chiens],
+              ["chats", "Avec les chats", fiche?.compatNotes?.chats],
+              ["enfants", "Avec les enfants", fiche?.compatNotes?.enfants],
             ] as const
-          ).map(([cle, label, valeur, note]) => {
-            const champ = `compat${cle.charAt(0).toUpperCase()}${cle.slice(1)}`;
-            return (
-              <div key={cle} className="grid gap-5 sm:grid-cols-[220px_1fr]">
-                <Champ id={champ} label={label} manquant={aRemplir(champ)}>
-                  <Liste id={champ} name={champ} defaultValue={fiche ? (valeur ?? "a_tester") : ""} options={OPTIONS_COMPAT} />
-                </Champ>
-                <Champ id={`compatNote${cle}`} label="Précision" aide="Facultatif — affiché à côté de la réponse.">
-                  <Texte
-                    id={`compatNote${cle}`}
-                    name={`compatNote${cle.charAt(0).toUpperCase()}${cle.slice(1)}`}
-                    defaultValue={note}
-                  />
-                </Champ>
-              </div>
-            );
-          })}
+          ).map(([cle, label, note]) => (
+            <Champ
+              key={cle}
+              id={`compatNote${cle}`}
+              label={label}
+              aide="Par exemple : « uniquement avec des chiennes » ou « jamais testé »."
+            >
+              <Texte
+                id={`compatNote${cle}`}
+                name={`compatNote${cle.charAt(0).toUpperCase()}${cle.slice(1)}`}
+                defaultValue={note}
+              />
+            </Champ>
+          ))}
         </div>
 
         {/* ---------------- Santé ---------------- */}
         <div className={panneau("sante")}>
-          {/*
-            Trois listes plutôt que trois cases à cocher : une case décochée
-            répond « non » sans qu'on ait rien décidé. Ici il faut choisir.
-          */}
-          <div className="grid gap-5 sm:grid-cols-3">
-            {(
-              [
-                ["identifie", "Identifié", fiche?.sante.identifie],
-                ["vaccine", "Vacciné", fiche?.sante.vaccine],
-                ["sterilise", "Stérilisé", fiche?.sante.sterilise],
-              ] as const
-            ).map(([cle, label, valeur]) => (
-              <Champ key={cle} id={cle} label={label} manquant={aRemplir(cle)}>
-                <Liste
-                  id={cle}
-                  name={cle}
-                  defaultValue={fiche ? (valeur ? "oui" : "non") : ""}
-                  options={OPTIONS_OUI_NON}
-                />
-              </Champ>
-            ))}
-          </div>
           <Champ id="santeResume" label="État de santé" aide="Une phrase, affichée sur la fiche.">
             <Zone id="santeResume" name="santeResume" rows={2} defaultValue={fiche?.sante.resume} />
           </Champ>

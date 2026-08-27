@@ -54,7 +54,7 @@ function releve(form: HTMLFormElement): Point[] {
     {
       cle: "compatibilites",
       libelle: "Les trois compatibilités (chiens, chats, enfants)",
-      onglet: "Compatibilités",
+      onglet: "L’essentiel",
       bloquant: true,
       rempli: ["compatChiens", "compatChats", "compatEnfants"].every(
         (c) => valeur(form, c) !== "",
@@ -63,7 +63,7 @@ function releve(form: HTMLFormElement): Point[] {
     {
       cle: "sante",
       libelle: "Identifié, vacciné, stérilisé",
-      onglet: "Santé",
+      onglet: "L’essentiel",
       bloquant: true,
       rempli: ["identifie", "vaccine", "sterilise"].every(
         (c) => valeur(form, c) !== "",
